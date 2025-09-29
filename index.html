@@ -288,7 +288,7 @@
         function appendMessage(sender, text, link = null) {
             const messageElement = document.createElement('div');
             // FIX: Standardize horizontal spacing for consistent look (Added px-2)
-            messageElement.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'} mb-4 px-2`; 
+            messageElement.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'} mb-4 mx-2`; 
 
             const content = document.createElement('div');
             // Bold the link available token
@@ -306,7 +306,7 @@
             if (link && link !== 'None') {
                 
                 // --- FIX: Dynamic Link Logic ---
-                let linkText = 'View Relevant File';
+                let linkText = 'View Document';
                 let linkIcon = 'external-link';
                 
                 if (link.includes('slack.com') || link.includes('#ask-')) {
@@ -315,6 +315,18 @@
                 } else if (link.includes('jira') || link.includes('saasjet')) {
                     linkText = 'Open Jira Request Form';
                     linkIcon = 'briefcase';
+                } else if (link.includes('drive.google.com') || link.includes('google.com/drive')) {
+                    linkText = 'Open Google Drive Asset';
+                    linkIcon = 'folder';
+                } else if (link.includes('confluence')) {
+                    linkText = 'View Confluence Page';
+                    linkIcon = 'layout-list';
+                } else if (link.includes('snyk.interactgo.com')) {
+                    linkText = 'View Dispatch Documentation';
+                    linkIcon = 'mail';
+                } else {
+                    linkText = 'Learn More';
+                    linkIcon = 'external-link';
                 }
                 // --- END Dynamic Link Logic ---
 
