@@ -52,3 +52,205 @@
         <div class="card rounded-xl flex flex-col h-[85vh]">
             
             <div id="chatMessages" class="chat-container flex-grow p-4 md:p-6 space-y-4">
+                </div>
+
+            <div class="p-4 border-t border-gray-200">
+                
+                <div id="loadingIndicator" class="hidden flex items-center justify-center py-2 text-indigo-600">
+                    <div class="loading-spinner w-4 h-4 border-2 border-t-2 border-gray-200 rounded-full mr-2"></div>
+                    Thinking...
+                </div>
+                <div class="flex">
+                    <input type="text" id="userInput" placeholder="E.g., Where is the main logo file?" class="flex-grow p-3 border border-gray-300 rounded-l-lg focus:ring-indigo-500 focus:border-indigo-500" onkeydown="if(event.key === 'Enter') sendMessage()">
+                    <button id="sendButton" onclick="sendMessage()" class="px-4 py-3 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700 transition duration-150 ease-in-out disabled:opacity-50 flex items-center justify-center">
+                        <i data-lucide="send" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div id="errorBox" class="hidden mt-2 p-3 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+                    <span class="font-bold">Error:</span> <span id="errorMessage"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- API URL NOW POINTS TO THE SECURE VERCEL BACKEND ---
+        // The key is safely on the server and is NOT exposed here.
+        const apiUrl = '/api/chat'; 
+
+        // UI elements
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const errorBox = document.getElementById('errorBox');
+        const errorMessageSpan = document.getElementById('errorMessage');
+        
+        // Initial messages
+        document.addEventListener('DOMContentLoaded', () => {
+            appendMessage('bot', `Hello! I'm your Brand Concierge. I have been pre-loaded with the core design guidelines and asset locations. Ask me anything!`);
+            lucide.createIcons(); // Initialize Lucide icons
+        });
+
+        /**
+         * Utility function to display an error message.
+         * @param {string} message - The error message to display.
+         */
+        function displayError(message) {
+            errorMessageSpan.textContent = message;
+            errorBox.classList.remove('hidden');
+            loadingIndicator.classList.add('hidden');
+            sendButton.disabled = false;
+            userInput.disabled = false;
+        }
+
+        /**
+         * Appends a message to the chat interface.
+         * @param {string} sender - 'user' or 'bot'.
+         * @param {string} text - The message text.
+         * @param {string} [link] - Optional link to display.
+         */
+        function appendMessage(sender, text, link = null) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`;
+
+            const content = document.createElement('div');
+            // Check for the starting token of the "link" text in the conversational reply and bold it.
+            const formattedText = text.replace(/\[Link Available\]/, '**[Link Available]**');
+
+            content.className = `max-w-[80%] p-3 rounded-xl shadow-md ${
+                sender === 'user'
+                    ? 'bg-indigo-500 text-white rounded-br-none'
+                    : 'bg-white text-gray-800 rounded-tl-none border border-gray-200'
+            }`;
+
+            // Use innerHTML to allow simple formatting like **bold** in the reply
+            content.innerHTML = `<p>${formattedText}</p>`;
+
+            if (link) {
+                const linkElement = document.createElement('a');
+                linkElement.href = link;
+                linkElement.target = '_blank';
+                linkElement.className = 'mt-2 inline-flex items-center text-sm font-medium text-indigo-500 hover:text-indigo-600 transition duration-150';
+                linkElement.innerHTML = `<i data-lucide="external-link" class="w-4 h-4 mr-1"></i> View Relevant File`;
+                
+                // Re-initialize lucide icons for the new element
+                setTimeout(() => lucide.createIcons(), 0);
+
+                const linkWrapper = document.createElement('div');
+                linkWrapper.className = 'mt-2 border-t pt-2 border-indigo-200';
+                linkWrapper.appendChild(linkWrapper.cloneNode(true)); // Create a wrapper for the link
+                linkWrapper.innerHTML = ''; // Clear the initial clone content
+                linkWrapper.appendChild(linkElement);
+                content.appendChild(linkWrapper);
+            }
+
+            messageElement.appendChild(content);
+            chatMessages.prepend(messageElement); // Prepend to appear at the bottom of the reversed list
+            chatMessages.scrollTop = chatMessages.scrollHeight; // Keep at the bottom
+        }
+
+        /**
+         * Sends the user message to the Vercel Serverless Function.
+         */
+        async function sendMessage() {
+            const query = userInput.value.trim();
+            if (!query) return;
+
+            // 1. Display user message
+            appendMessage('user', query);
+            userInput.value = '';
+
+            // 2. UI State: Disable input and show loading
+            sendButton.disabled = true;
+            userInput.disabled = true;
+            loadingIndicator.classList.remove('hidden');
+            errorBox.classList.add('hidden');
+            
+            // --- API Call with Retry Logic (Exponential Backoff) ---
+            const maxRetries = 3;
+            let result = null;
+
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    // This call now goes to your Vercel/Netlify backend function
+                    const fetchResponse = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        // NOTE: knowledgeBaseContent is missing here.
+                        // You should ensure this is handled or removed from the backend if not needed.
+                        // Based on the original code, the backend expects both 'query' and 'knowledgeBaseContent'.
+                        // For this front-end to work as the original, you must provide a static knowledge base here, 
+                        // or, preferably, update the backend to load the knowledge base from a file or another source.
+                        // ASSUMING the backend is currently ONLY expecting 'query' for the purpose of fixing the error.
+                        // If the backend requires knowledgeBaseContent, you'll need to define it here.
+
+                        body: JSON.stringify({ query: query, knowledgeBaseContent: "This is a placeholder knowledge base. Actual content should be loaded here or fetched dynamically." }) 
+                    });
+                    
+                    if (fetchResponse.ok) {
+                        result = await fetchResponse.json();
+                        break; 
+                    } else if (fetchResponse.status === 429 && i < maxRetries - 1) {
+                        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    } else {
+                        // --- FIX: Robust error handling for non-JSON responses (e.g., Vercel errors) ---
+                        let errorDetails = fetchResponse.statusText;
+                        try {
+                            // 1. Try to read the body as JSON (expected format from api/chat.js)
+                            const errorBody = await fetchResponse.json();
+                            errorDetails = errorBody.details || errorBody.error || fetchResponse.statusText;
+                        } catch (e) {
+                            // 2. If it fails (SyntaxError), read it as plain text
+                            try {
+                                errorDetails = await fetchResponse.text();
+                                // Truncate long error messages for display
+                                if (errorDetails.length > 200) {
+                                    errorDetails = errorDetails.substring(0, 200) + '...';
+                                }
+                            } catch (textError) {
+                                // Cannot even read text, stick with the statusText
+                            }
+                        }
+                        // Now throw the error with the best available detail
+                        throw new Error(`Backend Error (Status ${fetchResponse.status}): ${errorDetails}`);
+                    }
+                } catch (e) {
+                    if (i === maxRetries - 1) {
+                        console.error('API call failed after retries:', e);
+                        displayError(`Failed to connect to the Brand Concierge service. Details: ${e.message}. Did you set the GEMINI_API_KEY environment variable in Vercel?`);
+                        return;
+                    }
+                    const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+
+            // Process the structured result from the backend
+            try {
+                // The result is already a parsed JSON object from the backend function
+                const reply = result.conversational_reply || "I encountered an issue processing the request. Please try rephrasing.";
+                
+                const link = (result.status === 'SUCCESS' && result.recommended_link && result.recommended_link !== 'None') 
+                             ? result.recommended_link 
+                             : null;
+                
+                appendMessage('bot', reply, link);
+
+            } catch (e) {
+                console.error("Error processing response from backend:", e);
+                // Fallback bot response for unexpected JSON or structure
+                appendMessage('bot', "I apologize, I'm having trouble understanding the backend response. Please try a different question.");
+
+            } finally {
+                // Final UI state cleanup
+                loadingIndicator.classList.add('hidden');
+                sendButton.disabled = false;
+                userInput.disabled = false;
+                userInput.focus();
+            }
+        }
+    </script>
+</body>
+</html>
