@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brand Concierge Chatbot</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Use a modern font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .chat-container {
+            height: 55vh; /* Adjusted height to fit file upload section */
+            max-height: 65vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column-reverse; /* Start chat at the bottom */
+        }
+        .card {
+            background-color: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        .loading-spinner {
+            border-top-color: #3b82f6;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="w-full max-w-2xl">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight mb-1">
+                <span class="text-indigo-600">Brand</span> Concierge AI
+            </h1>
+            <p class="text-gray-500 text-sm">Your instant guide to design guidelines and assets. Ask away!</p>
+        </header>
+
+        <!-- Chat Interface Card -->
+        <div class="card rounded-xl flex flex-col h-[85vh]">
+            
+            <!-- Chat Messages Display -->
+            <div id="chatMessages" class="chat-container flex-grow p-4 md:p-6 space-y-4">
+                <!-- Messages will be appended here (reversed order due to flex-direction-reverse) -->
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-4 border-t border-gray-200">
+                
+                <!-- File Upload Section -->
+                <div class="mb-4 p-3 border-2 border-dashed border-gray-300 rounded-lg">
+                    <label for="knowledgeFile" class="flex items-center text-sm font-medium text-gray-700 cursor-pointer hover:text-indigo-600 transition">
+                        <i data-lucide="file-up" class="w-5 h-5 mr-2 text-indigo-500"></i>
+                        Upload Knowledge Doc (.md or .txt):
+                        <span id="fileStatus" class="ml-2 text-xs font-normal text-gray-500 italic">Using default data.</span>
+                    </label>
+                    <input type="file" id="knowledgeFile" accept=".md, .txt" class="hidden" onchange="handleFileUpload(event)">
+                </div>
+
+                <div id="loadingIndicator" class="hidden flex items-center justify-center py-2 text-indigo-600">
+                    <div class="loading-spinner w-4 h-4 border-2 border-t-2 border-gray-200 rounded-full mr-2"></div>
+                    Thinking...
+                </div>
+                <div class="flex">
+                    <input type="text" id="userInput" placeholder="E.g., Where is the main logo file?" class="flex-grow p-3 border border-gray-300 rounded-l-lg focus:ring-indigo-500 focus:border-indigo-500" onkeydown="if(event.key === 'Enter') sendMessage()">
+                    <button id="sendButton" onclick="sendMessage()" class="px-4 py-3 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700 transition duration-150 ease-in-out disabled:opacity-50 flex items-center justify-center">
+                        <i data-lucide="send" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div id="errorBox" class="hidden mt-2 p-3 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+                    <span class="font-bold">Error:</span> <span id="errorMessage"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables provided by the Canvas environment
+        const apiKey = typeof __api_key !== 'undefined' ? __api_key : '';
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+        // UI elements
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const errorBox = document.getElementById('errorBox');
+        const errorMessageSpan = document.getElementById('errorMessage');
+        const knowledgeFileInput = document.getElementById('knowledgeFile');
+        const fileStatusSpan = document.getElementById('fileStatus');
+
+        // Default Knowledge Base content (used until a file is uploaded)
+        const DEFAULT_KNOWLEDGE_BASE = `
+            # Knowledge Base (Slack Export Simulation - Q|A|Link)
+
+            1. Q: "What is the hex code for our primary brand color?"
+               A: "You must use the primary brand color, hex #4A90E2. It’s defined in the official Brand Kit."
+               Link: "https://company.sharepoint.com/brandkit/colors.pdf"
+
+            2. Q: "Where can I find the high-resolution logo files?"
+               A: "All logo assets (PNG, SVG) are in the Shared Drive under 'Design Assets/Logos'."
+               Link: "https://drive.google.com/shared/design-assets/logos"
+
+            3. Q: "Is Arial allowed for public-facing documents?"
+               A: "No, the official typeface for all external use is Inter. Please refer to the Typography guidelines."
+               Link: "https://company.internal/brand/typography.html"
+
+            4. Q: "What's the turnaround time for a new social media graphic?"
+               A: "You need to fill out the Creative Request Form at least 5 business days in advance for approval."
+               Link: "https://forms.company.com/createrequest"
+            
+            5. Q: "What are the rules about using partner logos on our website?"
+               A: "Partner logos must be displayed at 75% scale relative to our logo and placed in the dedicated 'Partners' section."
+               Link: "https://company.internal/guidelines/partner-use"
+
+            6. Q: "What is the brand tone of voice (TOV)?"
+               A: "Our TOV is 'professional, approachable, and future-forward'."
+               Link: "https://company.internal/brand/toneofvoice.md"
+        `;
+        
+        // Variable to hold the active knowledge base content (default or uploaded)
+        let knowledgeBaseContent = DEFAULT_KNOWLEDGE_BASE;
+
+        // Initial messages
+        document.addEventListener('DOMContentLoaded', () => {
+            // Attach file input click handler to its label
+            document.querySelector('label[for="knowledgeFile"]').addEventListener('click', () => {
+                knowledgeFileInput.click();
+            });
+
+            appendMessage('bot', `Hello! I'm your Brand Concierge. I am currently using the default knowledge base. You can **upload a .md or .txt file** above to load your team's specific guidelines!`);
+            lucide.createIcons(); // Initialize Lucide icons
+        });
+        
+        /**
+         * Reads the content of the uploaded file and updates the knowledge base.
+         */
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                fileStatusSpan.textContent = 'Using default data.';
+                knowledgeBaseContent = DEFAULT_KNOWLEDGE_BASE;
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                knowledgeBaseContent = e.target.result;
+                fileStatusSpan.textContent = `File loaded: ${file.name}`;
+                fileStatusSpan.classList.remove('text-gray-500');
+                fileStatusSpan.classList.add('text-green-600', 'font-bold');
+                appendMessage('bot', `**Successfully loaded file:** ${file.name}. My responses will now be based on this document! Try asking a question about its contents.`);
+            };
+            reader.onerror = (e) => {
+                fileStatusSpan.textContent = 'Error loading file.';
+                console.error('File read error:', e);
+                knowledgeBaseContent = DEFAULT_KNOWLEDGE_BASE; // Fallback
+            };
+            reader.readAsText(file);
+        }
+
+
+        /**
+         * Utility function to display an error message.
+         * @param {string} message - The error message to display.
+         */
+        function displayError(message) {
+            errorMessageSpan.textContent = message;
+            errorBox.classList.remove('hidden');
+            loadingIndicator.classList.add('hidden');
+            sendButton.disabled = false;
+            userInput.disabled = false;
+        }
+
+        /**
+         * Appends a message to the chat interface.
+         * @param {string} sender - 'user' or 'bot'.
+         * @param {string} text - The message text.
+         * @param {string} [link] - Optional link to display.
+         */
+        function appendMessage(sender, text, link = null) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`;
+
+            const content = document.createElement('div');
+            // Check for the starting token of the "link" text in the conversational reply and bold it.
+            const formattedText = text.replace(/\[Link Available\]/, '**[Link Available]**');
+
+            content.className = `max-w-[80%] p-3 rounded-xl shadow-md ${
+                sender === 'user'
+                    ? 'bg-indigo-500 text-white rounded-br-none'
+                    : 'bg-white text-gray-800 rounded-tl-none border border-gray-200'
+            }`;
+
+            // Use innerHTML to allow simple formatting like **bold** in the reply
+            content.innerHTML = `<p>${formattedText}</p>`;
+
+            if (link) {
+                const linkElement = document.createElement('a');
+                linkElement.href = link;
+                linkElement.target = '_blank';
+                linkElement.className = 'mt-2 inline-flex items-center text-sm font-medium text-indigo-500 hover:text-indigo-600 transition duration-150';
+                linkElement.innerHTML = `<i data-lucide="external-link" class="w-4 h-4 mr-1"></i> View Relevant File`;
+                
+                // Re-initialize lucide icons for the new element
+                setTimeout(() => lucide.createIcons(), 0);
+
+                const linkWrapper = document.createElement('div');
+                linkWrapper.className = 'mt-2 border-t pt-2 border-indigo-200';
+                linkWrapper.appendChild(linkElement);
+                content.appendChild(linkWrapper);
+            }
+
+            messageElement.appendChild(content);
+            chatMessages.prepend(messageElement); // Prepend to appear at the bottom of the reversed list
+            chatMessages.scrollTop = chatMessages.scrollHeight; // Keep at the bottom
+        }
+
+        /**
+         * Sends the user message to the Gemini API.
+         */
+        async function sendMessage() {
+            const query = userInput.value.trim();
+            if (!query) return;
+
+            // 1. Display user message
+            appendMessage('user', query);
+            userInput.value = '';
+
+            // 2. UI State: Disable input and show loading
+            sendButton.disabled = true;
+            userInput.disabled = true;
+            loadingIndicator.classList.remove('hidden');
+            errorBox.classList.add('hidden');
+
+            // --- Gemini API Setup: System Prompt & Structured Output ---
+            const systemPrompt = `
+                You are the 'Brand Concierge', a friendly, professional, and highly knowledgeable AI assistant for the company design team.
+                Your primary purpose is to help users find the correct design guidelines, assets, or process documentation.
+                
+                You MUST use the provided KNOWLEDGE_BASE DOCUMENT to formulate your answer.
+                
+                1. Read the user's question and find the most relevant entry in the KNOWLEDGE_BASE.
+                2. If a match is found, your **conversational_reply** must be **rich and helpful**, summarizing the core answer (the 'A' section of the KB) in a professional tone. End your conversational reply with the phrase '[Link Available]' to signal that a link is present.
+                3. Do not invent answers or links. If a match is found, set the **status** to 'Found' and provide the exact **Link** found in the KNOWLEDGE_BASE.
+                4. If no clear match is found, politely inform the user that their question is outside the scope of the current documentation, set the **status** to 'NotFound', and leave the **recommended_link** as an empty string.
+                
+                Your output MUST be a single JSON object that strictly adheres to the provided schema.
+            `;
+
+            const userQuery = `
+                KNOWLEDGE_BASE DOCUMENT:
+                ${knowledgeBaseContent}
+                
+                USER QUESTION: "${query}"
+            `;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                config: {
+                    temperature: 0.1, // Keep it precise and less creative
+                    // MANDATORY for structured output
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            conversational_reply: { 
+                                type: "STRING", 
+                                description: "The friendly, helpful response summarizing the KB answer. Must end with '[Link Available]' if found." 
+                            },
+                            status: { 
+                                type: "STRING", 
+                                description: "Set to 'Found' if a match in KNOWLEDGE_BASE was used, otherwise 'NotFound'." 
+                            },
+                            recommended_link: { 
+                                type: "STRING", 
+                                description: "The file link (URL) from the KNOWLEDGE_BASE entry if STATUS is 'Found', otherwise an empty string." 
+                            }
+                        },
+                        required: ["conversational_reply", "status", "recommended_link"]
+                    }
+                }
+            };
+
+            // --- API Call with Retry Logic (Exponential Backoff) ---
+            const maxRetries = 3;
+            let response = null;
+
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const fetchResponse = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (fetchResponse.ok) {
+                        response = await fetchResponse.json();
+                        break; 
+                    } else if (fetchResponse.status === 429 && i < maxRetries - 1) {
+                        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    } else {
+                        throw new Error(`HTTP Error: ${fetchResponse.status} ${fetchResponse.statusText}`);
+                    }
+                } catch (e) {
+                    if (i === maxRetries - 1) {
+                        console.error('API call failed after retries:', e);
+                        displayError(`Failed to connect to the Gemini API. Details: ${e.message}`);
+                        return;
+                    }
+                    const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+
+            // Process the response
+            try {
+                const jsonText = response.candidates[0].content.parts[0].text;
+                const result = JSON.parse(jsonText);
+
+                const reply = result.conversational_reply || "I encountered an issue processing the request. Please try rephrasing.";
+                // Check for 'Found' status and ensure the link is a valid string
+                const link = (result.status === 'Found' && result.recommended_link && result.recommended_link.length > 0) 
+                             ? result.recommended_link 
+                             : null;
+                
+                appendMessage('bot', reply, link);
+
+            } catch (e) {
+                console.error("Error processing Gemini response:", e);
+                // Fallback bot response for unparseable JSON
+                appendMessage('bot', "I apologize, I'm having trouble processing that request right now. Please try a different question or contact the design team directly.");
+
+            } finally {
+                // Final UI state cleanup
+                loadingIndicator.classList.add('hidden');
+                sendButton.disabled = false;
+                userInput.disabled = false;
+                userInput.focus();
+            }
+        }
+    </script>
+</body>
+</html>
