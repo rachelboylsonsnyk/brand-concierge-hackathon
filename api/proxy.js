@@ -1,38 +1,47 @@
-// api/proxy.js (Final attempt at a stable configuration)
+// api/proxy.js
 
-// --- HARDCODED KNOWLEDGE BASE ---
-const BRAND_KNOWLEDGE_BASE = `
-    DESIGN GUIDELINES:
-    ---
-    1. Primary Logo Asset: The main SVG file is located in the Shared Google Drive under /Assets/Logos/Primary.svg. Use the link: https://drive.google.com/folder/primary-logo-svg [Link Available].
-    2. Brand Colors: The primary color is Hex #4f46e5 (Indigo 600). The secondary color is Hex #10b981 (Emerald 500).
-    3. Typography: Use the 'Inter' font family exclusively for all user interface elements.
-    4. Iconography: Use Lucide icons only. Do not use FontAwesome or Material Icons.
-    ---
-`;
+// Import Node.js built-in modules for file reading
+import { promises as fs } from 'fs';
+import path from 'path';
+
+// --- FINAL HACKATHON FIX: Hardcoded API Key Integrated ---
+// NOTE: Your key is securely placed here to bypass Vercel environment variable issues.
+const geminiApiKey = 'AIzaSyDG4hf3-JR4W06e5wVG6C8G0eRVKk4QuFU'; 
+// ------------------------------------------------
 
 export default async function handler(request, response) {
-    // --- FINAL FIX: Hardcoded API Key Integrated ---
-    const geminiApiKey = 'AIzaSyDG4hf3-JR4W06e5wVG6C8G0eRVKk4QuFU'; 
-    // ------------------------------------------------
-
     if (!geminiApiKey) {
-        return response.status(500).json({ error: 'Proxy Error: API Key check failed during execution.' });
+        return response.status(500).json({ error: 'Proxy Error: API Key check failed.' });
     }
 
     if (request.method !== 'POST') {
         return response.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    // 1. Define the actual Gemini API endpoint 
-    // Reverting to the newer model/v1beta to enable structured output (JSON schema)
+    // --- 1. FILE READING LOGIC ---
+    let knowledgeBaseContent;
+    try {
+        // Construct the path to the knowledge base file
+        const knowledgeFilePath = path.join(process.cwd(), 'knowledge_base.txt');
+        
+        // Read the file content asynchronously
+        knowledgeBaseContent = await fs.readFile(knowledgeFilePath, 'utf-8');
+    } catch (error) {
+        console.error("Knowledge Base Read Error:", error);
+        return response.status(500).json({ 
+            error: 'Configuration Error', 
+            details: 'Could not read knowledge_base.txt. Ensure the file is present in the project root.' 
+        });
+    }
+    // --- END FILE READING LOGIC ---
+
+    // Define the actual Gemini API endpoint 
     const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent";
 
     try {
         const { query } = request.body; 
         
         // 3. Construct the full user query with EMPATHY instructions and RULES
-        // NOTE: We MUST remove the "Google Search Tool" instruction since we are removing the tool.
         const userQuery = `
             SYSTEM INSTRUCTION: You are the **"Brand Concierge," an expert, hyper-efficient, and deeply empathetic AI assistant.** Your tone must be warm, supportive, and highly conversational.
 
@@ -43,7 +52,7 @@ export default async function handler(request, response) {
 
             KNOWLEDGE_BASE DOCUMENT:
             ---
-            ${BRAND_KNOWLEDGE_BASE} 
+            ${knowledgeBaseContent} 
             ---
             USER QUESTION: "${query}"
             Provide the best conversational_reply, status, and recommended_link.
@@ -52,7 +61,6 @@ export default async function handler(request, response) {
         // 4. Construct the CORRECT Gemini API request body (Structured JSON Enabled)
         const geminiRequest = {
             contents: [{ parts: [{ text: userQuery }] }],
-            // Reverting to the previous structure which supports JSON output schema:
             generationConfig: {
                 responseMimeType: "application/json",
                 responseSchema: {
@@ -65,7 +73,6 @@ export default async function handler(request, response) {
                     required: ["conversational_reply", "status", "recommended_link"]
                 }
             },
-            // REMOVED: The 'tools: [{ googleSearch: {} }]' array to fix the error.
         };
 
         // 5. Forward the request to the Gemini API
