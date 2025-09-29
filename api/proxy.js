@@ -14,7 +14,7 @@ const BRAND_KNOWLEDGE_BASE = `
 export default async function handler(request, response) {
     // --- TEMPORARY HACKATHON FIX: HARDCODING API KEY ---
     // NOTE: Replace the placeholder below with your actual Gemini API Key.
-    const geminiApiKey = 'YOUR_HARDCODED_GEMINI_API_KEY_HERE'; 
+    const geminiApiKey = 'AIzaSyDG4hf3-JR4W06e5wVG6C8G0eRVKk4QuFU'; 
     // ----------------------------------------------------
 
     if (!geminiApiKey || geminiApiKey.startsWith('YOUR_')) {
