@@ -1,5 +1,5 @@
-// Import the specific class directly. This is the most reliable pattern.
-import { GoogleGenAI } from '@google/generative-ai';
+// --- FIX 1: Use Named Import for correct constructor access ---
+import { GoogleGenAI } from '@google/generative-ai'; 
 
 // Define the system instructions that give the AI its 'Brand Concierge' persona
 const systemPrompt = `
@@ -42,9 +42,7 @@ const generationConfig = {
  * @throws {Error} if the API key is missing.
  */
 function initializeAIClient() {
-    // --- DEBUGGING LOG ---
     const key = process.env.GEMINI_API_KEY;
-    // This log confirms the key is read from Vercel's env variables.
     console.log("GEMINI_API_KEY:", key ? `${key.substring(0, 5)}...[${key.length} chars]` : "undefined");
     
     // CRITICAL CHECK: Ensures key is present
@@ -52,7 +50,7 @@ function initializeAIClient() {
         throw new Error('Configuration Error: GEMINI_API_KEY environment variable not set on Vercel.');
     }
 
-    // Now we use the directly imported class name
+    // FIX 2: Use the directly imported GoogleGenAI class
     return new GoogleGenAI({ 
         apiKey: key,
     });
@@ -70,6 +68,7 @@ export default async function handler(request, response) {
         // Initialize the client first
         ai = initializeAIClient();
 
+        // NOTE: This requires 'knowledgeBaseContent' to be sent from the frontend!
         const { query, knowledgeBaseContent } = request.body;
 
         if (!query || !knowledgeBaseContent) {
@@ -92,7 +91,8 @@ export default async function handler(request, response) {
             model: "gemini-2.5-flash-preview-05-20",
             contents: [{ parts: [{ text: userQuery }] }],
             generationConfig: generationConfig,
-            systemInstruction: { parts: [{ text: systemPrompt }] },
+            // ✅ FIX 3: Pass the system prompt as a simple string
+            systemInstruction: systemPrompt,
         });
 
         // The response text is a JSON string
