@@ -1,11 +1,5 @@
 import { GoogleGenAI } from '@google/generative-ai';
 
-// Initialize the GoogleGenAI client
-// It securely reads the GEMINI_API_KEY from Vercel's environment variables
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
-
 // Define the system instructions that give the AI its 'Brand Concierge' persona
 const systemPrompt = `
     You are the "Brand Concierge," a friendly, expert, and hyper-efficient AI assistant for the design team.
@@ -48,13 +42,19 @@ export default async function handler(request, response) {
         return;
     }
 
-    // Check for API key existence before proceeding
+    // CRITICAL CHECK: Ensure the key is available before initializing the client.
     if (!process.env.GEMINI_API_KEY) {
-        // This should not happen if set correctly on Vercel, but is a good safeguard
-        response.status(500).json({ error: 'GEMINI_API_KEY environment variable not set.' });
+        // If the key is missing, return a proper JSON error that the frontend can read.
+        response.status(500).json({ error: 'Configuration Error: GEMINI_API_KEY environment variable not set on Vercel.' });
         return;
     }
 
+    // Initialize the GoogleGenAI client INSIDE the handler function.
+    // This is the key change for stability in serverless environments.
+    const ai = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API_KEY,
+    });
+    
     try {
         const { query, knowledgeBaseContent } = request.body;
 
@@ -93,7 +93,7 @@ export default async function handler(request, response) {
 
     } catch (error) {
         console.error("Gemini API Error:", error.message);
-        // Send a generic 500 error back to the frontend
+        // If the Gemini API fails (e.g., 403, 400), we catch it here and return a proper JSON error.
         response.status(500).json({
             error: 'A server error occurred while communicating with the Brand Concierge service.',
             details: error.message
