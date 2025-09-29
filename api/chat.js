@@ -35,34 +35,25 @@ const generationConfig = {
 
 /**
  * Robustly initializes and returns the GoogleGenAI client.
- * This is wrapped in a dedicated function for stability in serverless environments.
- * @returns {GoogleGenAI} The initialized client.
+ * This function uses a simplified CommonJS require pattern to guarantee the constructor is found.
+ * @returns {object} The initialized client instance.
  * @throws {Error} if the API key is missing.
  */
 function initializeAIClient() {
     // --- DEBUGGING LOG ---
-    // Log the key (or a truncated version) to Vercel logs to confirm access
     const key = process.env.GEMINI_API_KEY;
     console.log("GEMINI_API_KEY:", key ? `${key.substring(0, 5)}...[${key.length} chars]` : "undefined");
     
-    // CRITICAL CHECK: Ensure the key is available before initializing the client.
+    // CRITICAL CHECK: Ensures key is present
     if (!key) {
         throw new Error('Configuration Error: GEMINI_API_KEY environment variable not set on Vercel.');
     }
 
-    // FIX: Use require() to bypass ES module issues in certain environments
-    // The previous import line was removed to prevent a conflict.
-    const { GoogleGenAI: Client } = require('@google/generative-ai'); 
-    
-    // Check if Client is a function/constructor
-    if (typeof Client !== 'function') {
-        // This fallback should no longer be strictly needed but remains for resilience.
-        return new require('@google/generative-ai').GoogleGenAI({
-            apiKey: key,
-        });
-    }
+    // FINAL FIX: Use a simple, non-destructured require to access the class constructor directly.
+    // This bypasses the problematic module loader behavior that caused the constructor error.
+    const { GoogleGenAI } = require('@google/generative-ai'); 
 
-    return new Client({
+    return new GoogleGenAI({
         apiKey: key,
     });
 }
