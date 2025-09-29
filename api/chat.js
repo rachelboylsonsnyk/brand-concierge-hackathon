@@ -1,129 +1,102 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI } from '@google/generative-ai';
 
-// 1. The API key is securely stored in a Vercel Environment Variable (process.env)
-// The key IS NOT visible in the public code.
-const ai = new GoogleGenAI({ 
-    apiKey: process.env.GEMINI_API_KEY 
+// Initialize the GoogleGenAI client
+// It securely reads the GEMINI_API_KEY from Vercel's environment variables
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
 });
 
-// Configure the model and structured output
-const modelName = "gemini-2.5-flash-preview-05-20";
-
-// PERMANENT KNOWLEDGE BASE CONTENT (Replicated from your HTML)
-const KNOWLEDGE_BASE = `
-    # Brand Design Knowledge Base
-
-    1. Q: "What is the hex code for our primary brand color?"
-       A: "You must use the primary brand color, hex #4A90E2 (Indigo). It’s defined in the official Brand Kit."
-       Link: "https://company.sharepoint.com/brandkit/colors.pdf"
-
-    2. Q: "Where can I find the high-resolution logo files?"
-       A: "All logo assets (PNG, SVG) are in the Shared Drive under 'Design Assets/Logos'. Please do not stretch or distort them."
-       Link: "https://drive.google.com/shared/design-assets/logos"
-
-    3. Q: "Is Arial allowed for public-facing documents?"
-       A: "No, the official typeface for all external use is Inter. Arial is only for internal drafts. Please refer to the Typography guidelines."
-       Link: "https://company.internal/brand/typography.html"
-
-    4. Q: "What's the turnaround time for a new social media graphic?"
-       A: "You need to fill out the Creative Request Form at least 5 business days in advance for approval. Urgent requests may be denied."
-       Link: "https://forms.company.com/createrequest"
-    
-    5. Q: "What are the rules about using partner logos on our website?"
-       A: "Partner logos must be displayed at 75% scale relative to our logo and placed in the dedicated 'Partners' section on the footer."
-       Link: "https://company.internal/guidelines/partner-use"
-
-    6. Q: "What is the brand tone of voice (TOV)?"
-       A: "Our TOV is 'professional, approachable, and future-forward'. Avoid overly casual language in press releases."
-       Link: "https://company.internal/brand/toneofvoice.md"
-`;
-
-// System Instruction to guide the model's persona and output
+// Define the system instructions that give the AI its 'Brand Concierge' persona
 const systemPrompt = `
-    You are the 'Brand Concierge', a friendly, professional, and highly knowledgeable AI assistant for the company design team.
-    Your primary purpose is to help users find the correct design guidelines, assets, or process documentation.
-    
-    You MUST use the provided KNOWLEDGE_BASE DOCUMENT to formulate your answer.
-    
-    1. Read the user's question and find the most relevant entry in the KNOWLEDGE_BASE.
-    2. If a match is found, your **conversational_reply** must be **rich and helpful**, summarizing the core answer (the 'A' section of the KB) in a professional tone. End your conversational reply with the phrase '[Link Available]' to signal that a link is present.
-    3. Do not invent answers or links. If a match is found, set the **status** to 'Found' and provide the exact **Link** found in the KNOWLEDGE_BASE.
-    4. If no clear match is found, politely inform the user that their question is outside the scope of the current documentation, set the **status** to 'NotFound', and leave the **recommended_link** as an empty string.
-    
-    Your output MUST be a single JSON object that strictly adheres to the provided schema.
+    You are the "Brand Concierge," a friendly, expert, and hyper-efficient AI assistant for the design team.
+    Your core task is to answer user questions based STRICTLY on the KNOWLEDGE_BASE DOCUMENT provided by the design head.
+
+    RULES:
+    1. You MUST first read and prioritize the content in the KNOWLEDGE_BASE DOCUMENT.
+    2. Your conversational_reply MUST be a friendly, conversational summary (2-3 sentences) of the answer, directly referencing the information found in the document.
+    3. If the KNOWLEDGE_BASE DOCUMENT does not contain the answer, your conversational_reply must politely state, "I cannot find specific guidance on that in the current knowledge document."
+    4. You MUST always return a valid JSON object matching the required schema.
 `;
 
-const responseSchema = {
-    type: "OBJECT",
-    properties: {
-        conversational_reply: { 
-            type: "STRING", 
-            description: "The friendly, helpful response summarizing the KB answer. Must end with '[Link Available]' if found." 
+// Configuration for structured output (JSON)
+const generationConfig = {
+    responseMimeType: "application/json",
+    responseSchema: {
+        type: "OBJECT",
+        properties: {
+            conversational_reply: {
+                type: "STRING",
+                description: "The friendly, conversational summary of the answer based on the knowledge base."
+            },
+            status: {
+                type: "STRING",
+                description: "A simple status: 'SUCCESS' if an answer/link was found, 'NOT_FOUND' otherwise."
+            },
+            recommended_link: {
+                type: "STRING",
+                description: "The URL or path that the user should be directed to for the detailed resource. Use 'None' if no specific link is mentioned in the document for the answer."
+            }
         },
-        status: { 
-            type: "STRING", 
-            description: "Set to 'Found' if a match in KNOWLEDGE_BASE was used, otherwise 'NotFound'." 
-        },
-        recommended_link: { 
-            type: "STRING", 
-            description: "The file link (URL) from the KNOWLEDGE_BASE entry if STATUS is 'Found', otherwise an empty string." 
-        }
-    },
-    required: ["conversational_reply", "status", "recommended_link"]
+        required: ["conversational_reply", "status", "recommended_link"]
+    }
 };
 
+// Vercel Serverless Function handler
+export default async function handler(request, response) {
+    if (request.method !== 'POST') {
+        response.status(405).json({ error: 'Method Not Allowed' });
+        return;
+    }
 
-/**
- * Main handler for the Vercel Serverless Function.
- */
-export default async function handler(req, res) {
-    if (req.method !== 'POST') {
-        return res.status(405).send({ message: 'Only POST requests allowed' });
+    // Check for API key existence before proceeding
+    if (!process.env.GEMINI_API_KEY) {
+        // This should not happen if set correctly on Vercel, but is a good safeguard
+        response.status(500).json({ error: 'GEMINI_API_KEY environment variable not set.' });
+        return;
     }
 
     try {
-        const { query } = req.body;
-        
-        if (!query) {
-            return res.status(400).send({ message: 'Missing user query' });
+        const { query, knowledgeBaseContent } = request.body;
+
+        if (!query || !knowledgeBaseContent) {
+             response.status(400).json({ error: 'Missing "query" or "knowledgeBaseContent" in request body.' });
+             return;
         }
 
+        // Construct the full prompt sent to Gemini
         const userQuery = `
             KNOWLEDGE_BASE DOCUMENT:
-            ${KNOWLEDGE_BASE}
-            
+            ---
+            ${knowledgeBaseContent}
+            ---
             USER QUESTION: "${query}"
+            Based on the document, provide the best conversational_reply, status, and recommended_link.
         `;
-        
-        // --- Call Gemini from the secure backend ---
-        const response = await ai.generateContent({
-            model: modelName,
+
+        // Generate content using gemini-2.5-flash
+        const apiResponse = await ai.generateContent({
+            model: "gemini-2.5-flash-preview-05-20",
             contents: [{ parts: [{ text: userQuery }] }],
-            config: {
-                temperature: 0.1,
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                responseMimeType: "application/json",
-                responseSchema: responseSchema
-            }
+            generationConfig: generationConfig,
+            systemInstruction: { parts: [{ text: systemPrompt }] },
         });
-        
-        // Extract and parse the JSON result
-        const jsonText = response.candidates?.[0]?.content?.parts?.[0]?.text;
-        
-        if (!jsonText) {
-             throw new Error("Gemini response structure invalid or empty.");
+
+        // The response text is a JSON string
+        const jsonResponse = apiResponse.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!jsonResponse) {
+            throw new Error("API returned an empty or malformed response.");
         }
 
-        const result = JSON.parse(jsonText);
-        
-        // Send the structured result back to the frontend
-        res.status(200).json(result);
+        // Send the JSON response back to the frontend
+        response.status(200).json(JSON.parse(jsonResponse));
 
     } catch (error) {
-        console.error("API Error in Serverless Function:", error.message);
-        res.status(500).json({ 
-            error: "Failed to process AI request.", 
-            details: error.message 
+        console.error("Gemini API Error:", error.message);
+        // Send a generic 500 error back to the frontend
+        response.status(500).json({
+            error: 'A server error occurred while communicating with the Brand Concierge service.',
+            details: error.message
         });
     }
 }
