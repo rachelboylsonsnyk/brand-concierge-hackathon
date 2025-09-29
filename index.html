@@ -20,9 +20,10 @@
             min-height: 100vh;
             padding: 1rem;
         }
+        /* Increased height since file upload section is removed */
         .chat-container {
-            height: 55vh; /* Adjusted height to fit file upload section */
-            max-height: 65vh;
+            height: 65vh; 
+            max-height: 75vh;
             overflow-y: auto;
             display: flex;
             flex-direction: column-reverse; /* Start chat at the bottom */
@@ -62,16 +63,6 @@
             <!-- Input Area -->
             <div class="p-4 border-t border-gray-200">
                 
-                <!-- File Upload Section -->
-                <div class="mb-4 p-3 border-2 border-dashed border-gray-300 rounded-lg">
-                    <label for="knowledgeFile" class="flex items-center text-sm font-medium text-gray-700 cursor-pointer hover:text-indigo-600 transition">
-                        <i data-lucide="file-up" class="w-5 h-5 mr-2 text-indigo-500"></i>
-                        Upload Knowledge Doc (.md or .txt):
-                        <span id="fileStatus" class="ml-2 text-xs font-normal text-gray-500 italic">Using default data.</span>
-                    </label>
-                    <input type="file" id="knowledgeFile" accept=".md, .txt" class="hidden" onchange="handleFileUpload(event)">
-                </div>
-
                 <div id="loadingIndicator" class="hidden flex items-center justify-center py-2 text-indigo-600">
                     <div class="loading-spinner w-4 h-4 border-2 border-t-2 border-gray-200 rounded-full mr-2"></div>
                     Thinking...
@@ -101,79 +92,41 @@
         const loadingIndicator = document.getElementById('loadingIndicator');
         const errorBox = document.getElementById('errorBox');
         const errorMessageSpan = document.getElementById('errorMessage');
-        const knowledgeFileInput = document.getElementById('knowledgeFile');
-        const fileStatusSpan = document.getElementById('fileStatus');
 
-        // Default Knowledge Base content (used until a file is uploaded)
-        const DEFAULT_KNOWLEDGE_BASE = `
-            # Knowledge Base (Slack Export Simulation - Q|A|Link)
+        // PERMANENT KNOWLEDGE BASE CONTENT
+        const KNOWLEDGE_BASE = `
+            # Brand Design Knowledge Base
 
             1. Q: "What is the hex code for our primary brand color?"
-               A: "You must use the primary brand color, hex #4A90E2. It’s defined in the official Brand Kit."
+               A: "You must use the primary brand color, hex #4A90E2 (Indigo). It’s defined in the official Brand Kit."
                Link: "https://company.sharepoint.com/brandkit/colors.pdf"
 
             2. Q: "Where can I find the high-resolution logo files?"
-               A: "All logo assets (PNG, SVG) are in the Shared Drive under 'Design Assets/Logos'."
+               A: "All logo assets (PNG, SVG) are in the Shared Drive under 'Design Assets/Logos'. Please do not stretch or distort them."
                Link: "https://drive.google.com/shared/design-assets/logos"
 
             3. Q: "Is Arial allowed for public-facing documents?"
-               A: "No, the official typeface for all external use is Inter. Please refer to the Typography guidelines."
+               A: "No, the official typeface for all external use is Inter. Arial is only for internal drafts. Please refer to the Typography guidelines."
                Link: "https://company.internal/brand/typography.html"
 
             4. Q: "What's the turnaround time for a new social media graphic?"
-               A: "You need to fill out the Creative Request Form at least 5 business days in advance for approval."
+               A: "You need to fill out the Creative Request Form at least 5 business days in advance for approval. Urgent requests may be denied."
                Link: "https://forms.company.com/createrequest"
             
             5. Q: "What are the rules about using partner logos on our website?"
-               A: "Partner logos must be displayed at 75% scale relative to our logo and placed in the dedicated 'Partners' section."
+               A: "Partner logos must be displayed at 75% scale relative to our logo and placed in the dedicated 'Partners' section on the footer."
                Link: "https://company.internal/guidelines/partner-use"
 
             6. Q: "What is the brand tone of voice (TOV)?"
-               A: "Our TOV is 'professional, approachable, and future-forward'."
+               A: "Our TOV is 'professional, approachable, and future-forward'. Avoid overly casual language in press releases."
                Link: "https://company.internal/brand/toneofvoice.md"
         `;
         
-        // Variable to hold the active knowledge base content (default or uploaded)
-        let knowledgeBaseContent = DEFAULT_KNOWLEDGE_BASE;
-
         // Initial messages
         document.addEventListener('DOMContentLoaded', () => {
-            // Attach file input click handler to its label
-            document.querySelector('label[for="knowledgeFile"]').addEventListener('click', () => {
-                knowledgeFileInput.click();
-            });
-
-            appendMessage('bot', `Hello! I'm your Brand Concierge. I am currently using the default knowledge base. You can **upload a .md or .txt file** above to load your team's specific guidelines!`);
+            appendMessage('bot', `Hello! I'm your Brand Concierge. I have been pre-loaded with the core design guidelines and asset locations. Ask me anything!`);
             lucide.createIcons(); // Initialize Lucide icons
         });
-        
-        /**
-         * Reads the content of the uploaded file and updates the knowledge base.
-         */
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) {
-                fileStatusSpan.textContent = 'Using default data.';
-                knowledgeBaseContent = DEFAULT_KNOWLEDGE_BASE;
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                knowledgeBaseContent = e.target.result;
-                fileStatusSpan.textContent = `File loaded: ${file.name}`;
-                fileStatusSpan.classList.remove('text-gray-500');
-                fileStatusSpan.classList.add('text-green-600', 'font-bold');
-                appendMessage('bot', `**Successfully loaded file:** ${file.name}. My responses will now be based on this document! Try asking a question about its contents.`);
-            };
-            reader.onerror = (e) => {
-                fileStatusSpan.textContent = 'Error loading file.';
-                console.error('File read error:', e);
-                knowledgeBaseContent = DEFAULT_KNOWLEDGE_BASE; // Fallback
-            };
-            reader.readAsText(file);
-        }
-
 
         /**
          * Utility function to display an error message.
@@ -265,7 +218,7 @@
 
             const userQuery = `
                 KNOWLEDGE_BASE DOCUMENT:
-                ${knowledgeBaseContent}
+                ${KNOWLEDGE_BASE}
                 
                 USER QUESTION: "${query}"
             `;
