@@ -1,5 +1,4 @@
 // api/proxy.js
-
 // This function acts as a secure intermediary (a proxy) whose only job is 
 // to take a request from the frontend, add the secret API key, and forward it 
 // to the actual Gemini API endpoint. This avoids module loading conflicts.
