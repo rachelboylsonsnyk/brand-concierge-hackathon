@@ -1,5 +1,3 @@
-import { GoogleGenAI } from '@google/generative-ai';
-
 // Define the system instructions that give the AI its 'Brand Concierge' persona
 const systemPrompt = `
     You are the "Brand Concierge," a friendly, expert, and hyper-efficient AI assistant for the design team.
@@ -47,13 +45,14 @@ function initializeAIClient() {
         throw new Error('Configuration Error: GEMINI_API_KEY environment variable not set on Vercel.');
     }
 
-    // FIX: Destructure GoogleGenAI from the import structure
+    // FIX: Use require() to bypass ES module issues in certain environments
+    // The previous import line was removed to prevent a conflict.
     const { GoogleGenAI: Client } = require('@google/generative-ai'); 
     
     // Check if Client is a function/constructor
     if (typeof Client !== 'function') {
-        // Fallback for environments that export the client class directly as the default
-        return new GoogleGenAI({
+        // This fallback should no longer be strictly needed but remains for resilience.
+        return new require('@google/generative-ai').GoogleGenAI({
             apiKey: process.env.GEMINI_API_KEY,
         });
     }
