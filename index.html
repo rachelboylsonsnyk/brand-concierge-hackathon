@@ -106,7 +106,7 @@
             <!-- CHAT VIEW CONTAINER -->
             <div id="chatView" class="flex flex-col flex-grow">
                 <!-- Chat Messages Display -->
-                <div id="chatMessages" class="chat-container flex-grow p-4 md:p-6 space-y-4">
+                <div id="chatMessages" class="chat-container flex-grow space-y-4"> 
                     <!-- Messages will be appended here -->
                 </div>
 
@@ -287,8 +287,8 @@
 
         function appendMessage(sender, text, link = null) {
             const messageElement = document.createElement('div');
-            // FIX: Standardize horizontal spacing for consistent look
-            messageElement.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`;
+            // FIX: Standardize horizontal spacing for consistent look (Added px-2)
+            messageElement.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'} mb-4 px-2`; 
 
             const content = document.createElement('div');
             // Bold the link available token
