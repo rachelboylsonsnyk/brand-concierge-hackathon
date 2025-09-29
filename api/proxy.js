@@ -5,13 +5,16 @@ import { promises as fs } from 'fs';
 import path from 'path';
 
 // --- FINAL HACKATHON FIX: Hardcoded API Key Integrated ---
-// NOTE: Your key is securely placed here to bypass Vercel environment variable issues.
-const geminiApiKey = 'AIzaSyDG4hf3-JR4W06e5wVG6C8G0eRVKk4QuFU'; 
+// 🔑 NEW KEY INTEGRATED: This should resolve the permission/restriction issues.
+const geminiApiKey = 'AIzaSyBtePGI98eLX1idoPhS_wxqO-Us9AQD5Nc'; 
 // ------------------------------------------------
 
 export default async function handler(request, response) {
-    if (!geminiApiKey) {
-        return response.status(500).json({ error: 'Proxy Error: API Key check failed.' });
+    if (geminiApiKey === 'YOUR_NEW_API_KEY_HERE' || !geminiApiKey) {
+        return response.status(500).json({ 
+            error: 'Proxy Error', 
+            details: 'API Key is missing. Please check your api/proxy.js file.' 
+        });
     }
 
     if (request.method !== 'POST') {
@@ -23,8 +26,6 @@ export default async function handler(request, response) {
     try {
         // Construct the path to the knowledge base file
         const knowledgeFilePath = path.join(process.cwd(), 'knowledge_base.txt');
-        
-        // Read the file content asynchronously
         knowledgeBaseContent = await fs.readFile(knowledgeFilePath, 'utf-8');
     } catch (error) {
         console.error("Knowledge Base Read Error:", error);
