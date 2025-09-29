@@ -1,0 +1,7 @@
+DESIGN GUIDELINES:
+---
+1. Primary Logo Asset: The main SVG file is located in the Shared Google Drive under /Assets/Logos/Primary.svg. Use the link: https://drive.google.com/folder/primary-logo-svg.
+2. Brand Colors: The primary color is Hex #4f46e5 (Indigo 600). The secondary color is Hex #10b981 (Emerald 500).
+3. Typography: Use the 'Inter' font family exclusively for all user interface elements.
+4. Iconography: Use Lucide icons only. Do not use FontAwesome or Material Icons.
+---
