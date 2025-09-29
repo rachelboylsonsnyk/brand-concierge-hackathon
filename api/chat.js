@@ -40,8 +40,13 @@ const generationConfig = {
  * @throws {Error} if the API key is missing.
  */
 function initializeAIClient() {
+    // --- DEBUGGING LOG ---
+    // Log the key (or a truncated version) to Vercel logs to confirm access
+    const key = process.env.GEMINI_API_KEY;
+    console.log("GEMINI_API_KEY:", key ? `${key.substring(0, 5)}...[${key.length} chars]` : "undefined");
+    
     // CRITICAL CHECK: Ensure the key is available before initializing the client.
-    if (!process.env.GEMINI_API_KEY) {
+    if (!key) {
         throw new Error('Configuration Error: GEMINI_API_KEY environment variable not set on Vercel.');
     }
 
@@ -53,12 +58,12 @@ function initializeAIClient() {
     if (typeof Client !== 'function') {
         // This fallback should no longer be strictly needed but remains for resilience.
         return new require('@google/generative-ai').GoogleGenAI({
-            apiKey: process.env.GEMINI_API_KEY,
+            apiKey: key,
         });
     }
 
     return new Client({
-        apiKey: process.env.GEMINI_API_KEY,
+        apiKey: key,
     });
 }
 
