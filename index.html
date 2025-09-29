@@ -26,6 +26,8 @@
             align-items: center;
             min-height: 100vh;
             padding: 1rem;
+            /* FIX: Subtle negative letter-spacing for refined look */
+            letter-spacing: -0.015em;
         }
         .chat-container {
             /* This height now relies on the parent card being flexible */
@@ -90,13 +92,13 @@
             <!-- Navigation Tabs -->
             <nav class="flex border-b border-gray-600">
                 <!-- FIX: text-gray-300 changed to text-white for all tabs -->
-                <button id="chatTab" onclick="showTab('chat')" class="flex-1 p-3 text-center text-white hover:bg-[#525a99] transition-colors tab-active">
+                <button id="chatTab" onclick="showTab('chat')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors tab-active">
                     <i data-lucide="message-square" class="w-4 h-4 inline-block mr-1 text-white"></i> Chat
                 </button>
-                <button id="aboutTab" onclick="showTab('about')" class="flex-1 p-3 text-center text-white hover:bg-[#525a99] transition-colors">
+                <button id="aboutTab" onclick="showTab('about')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors">
                     <i data-lucide="info" class="w-4 h-4 inline-block mr-1 text-white"></i> About
                 </button>
-                <button id="futureTab" onclick="showTab('future')" class="flex-1 p-3 text-center text-white hover:bg-[#525a99] transition-colors">
+                <button id="futureTab" onclick="showTab('future')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors">
                     <i data-lucide="rocket" class="w-4 h-4 inline-block mr-1 text-white"></i> Future
                 </button>
             </nav>
@@ -139,7 +141,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
                     
                     <!-- Team Member 1: Caleb Minns -->
-                    <div class="p-4 bg-[#0B0B8E] rounded-lg shadow-xl text-center">
+                    <div class="p-4 bg-[#1D1D4D] rounded-lg shadow-xl text-center">
                         <img src="/assets/images/caleb.png" 
                              alt="Headshot for Caleb Minns" 
                              class="w-24 h-24 rounded-full mx-auto mb-3 border-4 border-[#FD00F9]">
@@ -149,7 +151,7 @@
                     </div>
 
                     <!-- Team Member 2: Dan Edwards -->
-                    <div class="p-4 bg-[#0B0B8E] rounded-lg shadow-xl text-center">
+                    <div class="p-4 bg-[#1D1D4D] rounded-lg shadow-xl text-center">
                         <img src="https://placehold.co/100x100/4f46e5/ffffff?text=DE" 
                              alt="Placeholder headshot for Dan Edwards" 
                              class="w-24 h-24 rounded-full mx-auto mb-3 border-4 border-[#FD00F9]">
@@ -159,7 +161,7 @@
                     </div>
                     
                     <!-- Team Member 3: Rachel Boylson -->
-                    <div class="p-4 bg-[#0B0B8E] rounded-lg shadow-xl text-center">
+                    <div class="p-4 bg-[#1D1D4D] rounded-lg shadow-xl text-center">
                         <img src="/assets/images/rachel.jpeg" 
                              alt="Headshot for Rachel Boylson" 
                              class="w-24 h-24 rounded-full mx-auto mb-3 border-4 border-[#FD00F9]">
