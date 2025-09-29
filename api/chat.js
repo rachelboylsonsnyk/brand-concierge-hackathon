@@ -1,5 +1,6 @@
-// --- FIX 1: Use Named Import for correct constructor access ---
-import { GoogleGenAI } from '@google/generative-ai'; 
+// --- FIX 1 (New): Use CommonJS require for robust module loading on Vercel ---
+// This resolves persistent issues with 'import' syntax in some Node/Vercel environments.
+const { GoogleGenAI } = require('@google/generative-ai'); 
 
 // Define the system instructions that give the AI its 'Brand Concierge' persona
 const systemPrompt = `
@@ -44,16 +45,15 @@ const generationConfig = {
 function initializeAIClient() {
     const key = process.env.GEMINI_API_KEY;
 
-    // --- ENHANCED DEBUGGING LOG FOR API KEY CHECK ---
+    // ENHANCED DEBUGGING LOG FOR API KEY CHECK
     console.log("GEMINI_API_KEY Check:", key ? `Key found (length: ${key.length})` : "Key NOT found (undefined)");
-    // --------------------------------------------------
     
     // CRITICAL CHECK: Ensures key is present
     if (!key) {
         throw new Error('Configuration Error: GEMINI_API_KEY environment variable not set on Vercel.');
     }
 
-    // FIX 2: Use the directly imported GoogleGenAI class
+    // Use the required GoogleGenAI class
     return new GoogleGenAI({ 
         apiKey: key,
     });
@@ -93,7 +93,7 @@ export default async function handler(request, response) {
             model: "gemini-2.5-flash-preview-05-20",
             contents: [{ parts: [{ text: userQuery }] }],
             generationConfig: generationConfig,
-            // ✅ FIX 3: Pass the system prompt as a simple string
+            // Pass the system prompt as a simple string
             systemInstruction: systemPrompt,
         });
 
