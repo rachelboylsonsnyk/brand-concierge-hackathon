@@ -1,7 +1,5 @@
-// --- Reverting to Namespace Import to resolve persistent Vercel issues ---
-// This pattern is the original one from the hackathon starter and often works 
-// better than named imports when environment variables are involved.
-import * as GenerativeAI from '@google/generative-ai'; 
+// --- FIX: Using Named Import to resolve constructor conflict (Most Reliable) ---
+import { GoogleGenAI } from '@google/generative-ai'; 
 
 // Define the system instructions that give the AI its 'Brand Concierge' persona
 const systemPrompt = `
@@ -40,24 +38,23 @@ const generationConfig = {
 
 /**
  * Robustly initializes and returns the GoogleGenAI client.
- * NOTE: The client will automatically look for GEMINI_API_KEY in the environment.
  * @returns {object} The initialized client instance.
  * @throws {Error} if the API key is missing.
  */
 function initializeAIClient() {
-    // We are relying on the GoogleGenAI constructor to find the key.
-    const key = process.env.GEMINI_API_KEY; 
+    const key = process.env.GEMINI_API_KEY;
 
-    // FINAL CHECK: Ensure the key is seen by Vercel's runtime.
+    // ENHANCED DEBUGGING LOG FOR API KEY CHECK
     console.log("GEMINI_API_KEY Check:", key ? `Key found (length: ${key.length})` : "Key NOT found (undefined)");
     
+    // CRITICAL CHECK: Ensures key is present
     if (!key) {
-        // If the key is missing, throw an error the catch block can handle.
         throw new Error('Configuration Error: GEMINI_API_KEY environment variable not set on Vercel.');
     }
 
-    // Initialize using the namespace import and the standard constructor call.
-    return new GenerativeAI.GoogleGenAI({ 
+    // FIX 2: Initialize using the directly imported GoogleGenAI class
+    // This is the correct constructor call for the Named Import.
+    return new GoogleGenAI({ 
         apiKey: key,
     });
 }
@@ -96,7 +93,7 @@ export default async function handler(request, response) {
             model: "gemini-2.5-flash-preview-05-20",
             contents: [{ parts: [{ text: userQuery }] }],
             generationConfig: generationConfig,
-            // FIX 3: Pass the system prompt as a simple string (Critical fix)
+            // FIX 3: Pass the system prompt as a simple string
             systemInstruction: systemPrompt,
         });
 
@@ -115,8 +112,12 @@ export default async function handler(request, response) {
         console.error("Gemini API Runtime Error:", error);
         
         // This ensures the frontend gets a structured JSON error response.
-        if (error.message.includes('Configuration Error')) {
-            response.status(500).json({ error: error.message });
+        if (error.message.includes('Configuration Error') || error.message.includes('GoogleGenAI is not a constructor')) {
+            // Send a clear error message back to the frontend
+            response.status(500).json({ 
+                error: 'Configuration or Initialization Error', 
+                details: error.message
+            });
         } else {
             response.status(500).json({
                 error: 'A server error occurred while communicating with the Brand Concierge service.',
