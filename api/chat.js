@@ -43,7 +43,10 @@ const generationConfig = {
  */
 function initializeAIClient() {
     const key = process.env.GEMINI_API_KEY;
-    console.log("GEMINI_API_KEY:", key ? `${key.substring(0, 5)}...[${key.length} chars]` : "undefined");
+
+    // --- ENHANCED DEBUGGING LOG FOR API KEY CHECK ---
+    console.log("GEMINI_API_KEY Check:", key ? `Key found (length: ${key.length})` : "Key NOT found (undefined)");
+    // --------------------------------------------------
     
     // CRITICAL CHECK: Ensures key is present
     if (!key) {
@@ -68,7 +71,6 @@ export default async function handler(request, response) {
         // Initialize the client first
         ai = initializeAIClient();
 
-        // NOTE: This requires 'knowledgeBaseContent' to be sent from the frontend!
         const { query, knowledgeBaseContent } = request.body;
 
         if (!query || !knowledgeBaseContent) {
@@ -106,13 +108,15 @@ export default async function handler(request, response) {
         response.status(200).json(JSON.parse(jsonResponse));
 
     } catch (error) {
-        console.error("Gemini API Error:", error.message);
+        // Log the full error to Vercel logs
+        console.error("Gemini API Runtime Error:", error);
         
         // This catch block handles both configuration errors (from initializeAIClient) 
         // and Gemini API errors. We ensure the response is always JSON.
         if (error.message.includes('Configuration Error')) {
             response.status(500).json({ error: error.message });
         } else {
+            // Include a simplified error message for the front end
             response.status(500).json({
                 error: 'A server error occurred while communicating with the Brand Concierge service.',
                 details: error.message
