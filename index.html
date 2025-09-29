@@ -153,8 +153,8 @@
 
                     <!-- Team Member 2: Dan Edwards -->
                     <div class="p-4 bg-[#1D1D4D] rounded-lg shadow-xl text-center">
-                        <img src="https://placehold.co/100x100/4f46e5/ffffff?text=DE" 
-                             alt="Placeholder headshot for Dan Edwards" 
+                        <img src="/assets/images/dan.png" 
+                             alt="Headshot for Dan Edwards" 
                              class="w-24 h-24 rounded-full mx-auto mb-3 border-4 border-[#FD00F9]">
                         <p class="font-semibold text-white">Dan Edwards</p>
                         <!-- FIX: text-gray-300 changed to text-white -->
@@ -173,7 +173,7 @@
                 </div>
                 <!-- END TEAM SECTION -->
                 
-                <h3 class="text-2xl font-bold mb-4 text-[#FD00F9] border-t border-gray-600 pt-4">About the Brand Concierge: Hackathon Edition</h3>
+                <h3 class="text-2xl font-bold mb-4 text-[#FD00F9] border-t border-gray-600 pt-4">About the Brand Concierge</h3>
                 <p class="mb-4">
                     The <strong>Brand Concierge AI</strong> was developed to <strong>automate daily work</strong> by providing a single, intelligent source of truth for design guidelines. This project helps eliminate the time spent searching for assets and rules, allowing stakeholders to easily find information and <strong>simplify complex problems</strong> related to brand compliance.
                 </p>
@@ -183,7 +183,7 @@
                 <ul class="hanging-indent space-y-2 text-white"> 
                     <li><strong>Knowledge Base:</strong> Team guidelines are sourced from a dynamic, AI-curated knowledge repository.</li>
                     <li><strong>Gemini 2.5 Flash API:</strong> Used for hyper-efficient <strong>structured JSON output</strong> (reply, status, and link), ensuring reliable data parsing on the frontend.</li>
-                    <li><strong>Empathy Prompting:</strong> The system instruction guides the AI to reply with a warm, supportive, and conversational tone, turning a static document into a friendly assistant.</li>
+                    <li><strong>Empathy Prompting:</strong> The system instruction guides the AI to reply with a warm, supportive, and conversational tone, transforming data into a friendly assistant.</li>
                     <li><strong>Proxy Architecture:</strong> A Vercel <strong>Node.js Proxy</strong> securely handles the API key and file reading, ensuring stable deployment even with complex environment constraints.</li>
                 </ul>
 
@@ -192,9 +192,9 @@
             <!-- FUTURE VIEW CONTAINER -->
             <div id="futureView" class="flex-grow p-6 text-white overflow-y-auto hidden">
                 <!-- FIX: Set H2 to text-white -->
-                <h2 class="text-2xl font-bold mb-4 text-[#FD00F9]">Future Roadmap: Aligned with Hackathon Criteria</h2>
+                <h2 class="text-2xl font-bold mb-4 text-[#FD00F9]">Future Roadmap</h2>
                 <p class="mb-4">
-                    The following features represent the next stages of development, showing how the Brand Concierge provides clear value against the hackathon judging criteria.
+                    The following features represent the next stages of development, showing how the Brand Concierge provides clear value to the marketing team.
                 </p>
                 
                 <h3 class="text-xl font-semibold mb-2 mt-4 text-[#FD00F9]"><i data-lucide="zap" class="w-5 h-5 inline-block mr-1 text-yellow-400"></i> Innovation & Creativity</h3>
@@ -210,7 +210,7 @@
                 <p class="text-white mb-2">Goal: <strong>Automate daily work</strong> and ensure the solution is robust and usable.</p>
                 <!-- FIX: text-gray-300 changed to text-white for list items -->
                 <ul class="hanging-indent space-y-2 text-white"> 
-                    <li><strong>Live Source Integration:</strong> Replace the static knowledge file with a direct, automated fetch from <strong>Figma, Notion, or Confluence</strong> via their APIs, ensuring the knowledge is always up-to-date without manual intervention.</li>
+                    <li><strong>Live Source Integration:</strong> Replace the static knowledge file with a direct, automated fetch from **Google Drive, Dispatch, Confluence, Figma, or Slack** via their APIs, ensuring the knowledge is always up-to-date without manual intervention.</li>
                 </ul>
                 
                 <h3 class="text-xl font-semibold mb-2 mt-4 text-[#FD00F9]"><i data-lucide="trending-up" class="w-5 h-5 inline-block mr-1 text-red-400"></i> Impact & ROI</h3>
@@ -288,7 +288,8 @@
 
         function appendMessage(sender, text, link = null) {
             const messageElement = document.createElement('div');
-            // FIX: Replaced mb-4 with mt-4 for correct column-reverse spacing.
+            // FIX: Hardcoded spacing for vertical separation
+            // Using mt-4 for vertical space between messages and mx-2 for horizontal side margins
             messageElement.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'} mt-4 mx-2`; 
 
             const content = document.createElement('div');
