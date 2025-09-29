@@ -287,6 +287,7 @@
 
         function appendMessage(sender, text, link = null) {
             const messageElement = document.createElement('div');
+            // FIX: Standardize horizontal spacing for consistent look
             messageElement.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`;
 
             const content = document.createElement('div');
@@ -387,7 +388,7 @@
             try {
                 const reply = result.conversational_reply || "I encountered an issue processing the request. Please try rephrasing.";
                 
-                const link = (result.status === 'SUCCESS' && result.recommended_link && result.recommended_link !== 'None') 
+                const link = (result.recommended_link && result.recommended_link !== 'None') 
                              ? result.recommended_link 
                              : null;
                 
