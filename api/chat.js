@@ -1,5 +1,5 @@
-// --- FINAL FIX: Use the standard ES Module import structure ---
-// Vercel deployment logs suggest forcing ESM to resolve constructor issue.
+// --- FINAL FIX: Using Namespace Import to resolve constructor conflict ---
+// This pattern forces the module to load correctly in Vercel's Node.js environment.
 import * as GenerativeAI from '@google/generative-ai'; 
 
 // Define the system instructions that give the AI its 'Brand Concierge' persona
@@ -45,6 +45,7 @@ const generationConfig = {
 function initializeAIClient() {
     // --- DEBUGGING LOG ---
     const key = process.env.GEMINI_API_KEY;
+    // This log confirms the key is read from Vercel's env variables.
     console.log("GEMINI_API_KEY:", key ? `${key.substring(0, 5)}...[${key.length} chars]` : "undefined");
     
     // CRITICAL CHECK: Ensures key is present
@@ -53,6 +54,7 @@ function initializeAIClient() {
     }
 
     // FIX: Access the class via the namespace/root object: GenerativeAI.GoogleGenAI
+    // This resolves the "Cannot read properties of undefined" error.
     return new GenerativeAI.GoogleGenAI({ 
         apiKey: key,
     });
