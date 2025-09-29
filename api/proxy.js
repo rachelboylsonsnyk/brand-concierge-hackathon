@@ -29,7 +29,6 @@ export default async function handler(request, response) {
         knowledgeBaseContent = await fs.readFile(knowledgeFilePath, 'utf-8');
 
         // 🛑 CRITICAL FIX: Strip the Byte Order Mark (BOM) if present.
-        // This prevents invisible characters from corrupting the JSON payload sent to Gemini.
         if (knowledgeBaseContent.charCodeAt(0) === 0xFEFF) {
             knowledgeBaseContent = knowledgeBaseContent.slice(1);
         }
@@ -109,9 +108,20 @@ export default async function handler(request, response) {
         if (!jsonResponseText) {
              return response.status(500).json({ error: 'Malformed response from Gemini: missing content.', details: JSON.stringify(data) });
         }
+        
+        const parsedJson = JSON.parse(jsonResponseText);
 
-        // 7. Parse and return the final JSON structure
-        response.status(200).json(JSON.parse(jsonResponseText));
+        // 🛑 FIX: Post-process the link to remove Google Search prefixes if Gemini injected them.
+        const link = parsedJson.recommended_link;
+        if (link && link.startsWith("https://www.google.com/search")) {
+             // Attempt to extract the original URL from the 'q=' parameter (if present)
+             const urlParams = new URLSearchParams(link.split('?')[1]);
+             const originalUrl = urlParams.get('q');
+             parsedJson.recommended_link = originalUrl || link; // Use original or fall back to the raw link
+        }
+        
+        // 7. Return the processed structure
+        response.status(200).json(parsedJson);
 
     } catch (error) {
         console.error("Proxy Forward Error:", error);
