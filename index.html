@@ -81,11 +81,9 @@
     </div>
 
     <script>
-        // Global variables provided by the Canvas environment
-        // NOTE: You MUST replace 'PASTE_YOUR_FULL_API_KEY_HERE' with your actual, complete Gemini API key.
-        // The key must be the full, long string (starts with 'AIzaSy...' and is 39 characters long).
-        const apiKey = 'AIzaSyDG4hf3-JR4W06e5wVG6C8G0eRVKk4QuFU'; 
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        // --- API URL NOW POINTS TO THE SECURE VERCEL BACKEND ---
+        // The key is safely on the server and is NOT exposed here.
+        const apiUrl = '/api/chat'; 
 
         // UI elements
         const chatMessages = document.getElementById('chatMessages');
@@ -94,35 +92,6 @@
         const loadingIndicator = document.getElementById('loadingIndicator');
         const errorBox = document.getElementById('errorBox');
         const errorMessageSpan = document.getElementById('errorMessage');
-
-        // PERMANENT KNOWLEDGE BASE CONTENT
-        const KNOWLEDGE_BASE = `
-            # Brand Design Knowledge Base
-
-            1. Q: "What is the hex code for our primary brand color?"
-               A: "You must use the primary brand color, hex #4A90E2 (Indigo). It’s defined in the official Brand Kit."
-               Link: "https://company.sharepoint.com/brandkit/colors.pdf"
-
-            2. Q: "Where can I find the high-resolution logo files?"
-               A: "All logo assets (PNG, SVG) are in the Shared Drive under 'Design Assets/Logos'. Please do not stretch or distort them."
-               Link: "https://drive.google.com/shared/design-assets/logos"
-
-            3. Q: "Is Arial allowed for public-facing documents?"
-               A: "No, the official typeface for all external use is Inter. Arial is only for internal drafts. Please refer to the Typography guidelines."
-               Link: "https://company.internal/brand/typography.html"
-
-            4. Q: "What's the turnaround time for a new social media graphic?"
-               A: "You need to fill out the Creative Request Form at least 5 business days in advance for approval. Urgent requests may be denied."
-               Link: "https://forms.company.com/createrequest"
-            
-            5. Q: "What are the rules about using partner logos on our website?"
-               A: "Partner logos must be displayed at 75% scale relative to our logo and placed in the dedicated 'Partners' section on the footer."
-               Link: "https://company.internal/guidelines/partner-use"
-
-            6. Q: "What is the brand tone of voice (TOV)?"
-               A: "Our TOV is 'professional, approachable, and future-forward'. Avoid overly casual language in press releases."
-               Link: "https://company.internal/brand/toneofvoice.md"
-        `;
         
         // Initial messages
         document.addEventListener('DOMContentLoaded', () => {
@@ -177,6 +146,8 @@
 
                 const linkWrapper = document.createElement('div');
                 linkWrapper.className = 'mt-2 border-t pt-2 border-indigo-200';
+                linkWrapper.appendChild(linkWrapper.cloneNode(true)); // Create a wrapper for the link
+                linkWrapper.innerHTML = ''; // Clear the initial clone content
                 linkWrapper.appendChild(linkElement);
                 content.appendChild(linkWrapper);
             }
@@ -187,7 +158,7 @@
         }
 
         /**
-         * Sends the user message to the Gemini API.
+         * Sends the user message to the Vercel Serverless Function.
          */
         async function sendMessage() {
             const query = userInput.value.trim();
@@ -203,88 +174,34 @@
             loadingIndicator.classList.remove('hidden');
             errorBox.classList.add('hidden');
             
-            // Check if API key is still the placeholder
-            if (apiKey === 'PASTE_YOUR_FULL_API_KEY_HERE' || apiKey === '') {
-                 displayError("API Key is missing or invalid. Please replace 'PASTE_YOUR_FULL_API_KEY_HERE' in the code with your complete 39-character key.");
-                 return;
-            }
-
-
-            // --- Gemini API Setup: System Prompt & Structured Output ---
-            const systemPrompt = `
-                You are the 'Brand Concierge', a friendly, professional, and highly knowledgeable AI assistant for the company design team.
-                Your primary purpose is to help users find the correct design guidelines, assets, or process documentation.
-                
-                You MUST use the provided KNOWLEDGE_BASE DOCUMENT to formulate your answer.
-                
-                1. Read the user's question and find the most relevant entry in the KNOWLEDGE_BASE.
-                2. If a match is found, your **conversational_reply** must be **rich and helpful**, summarizing the core answer (the 'A' section of the KB) in a professional tone. End your conversational reply with the phrase '[Link Available]' to signal that a link is present.
-                3. Do not invent answers or links. If a match is found, set the **status** to 'Found' and provide the exact **Link** found in the KNOWLEDGE_BASE.
-                4. If no clear match is found, politely inform the user that their question is outside the scope of the current documentation, set the **status** to 'NotFound', and leave the **recommended_link** as an empty string.
-                
-                Your output MUST be a single JSON object that strictly adheres to the provided schema.
-            `;
-
-            const userQuery = `
-                KNOWLEDGE_BASE DOCUMENT:
-                ${KNOWLEDGE_BASE}
-                
-                USER QUESTION: "${query}"
-            `;
-
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                config: {
-                    temperature: 0.1, // Keep it precise and less creative
-                    // MANDATORY for structured output
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            conversational_reply: { 
-                                type: "STRING", 
-                                description: "The friendly, helpful response summarizing the KB answer. Must end with '[Link Available]' if found." 
-                            },
-                            status: { 
-                                type: "STRING", 
-                                description: "Set to 'Found' if a match in KNOWLEDGE_BASE was used, otherwise 'NotFound'." 
-                            },
-                            recommended_link: { 
-                                type: "STRING", 
-                                description: "The file link (URL) from the KNOWLEDGE_BASE entry if STATUS is 'Found', otherwise an empty string." 
-                            }
-                        },
-                        required: ["conversational_reply", "status", "recommended_link"]
-                    }
-                }
-            };
-
             // --- API Call with Retry Logic (Exponential Backoff) ---
             const maxRetries = 3;
-            let response = null;
+            let result = null;
 
             for (let i = 0; i < maxRetries; i++) {
                 try {
+                    // This call now goes to your Vercel/Netlify backend function
                     const fetchResponse = await fetch(apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify({ query: query }) // Send only the query to the backend
                     });
-
+                    
                     if (fetchResponse.ok) {
-                        response = await fetchResponse.json();
+                        result = await fetchResponse.json();
                         break; 
                     } else if (fetchResponse.status === 429 && i < maxRetries - 1) {
                         const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
                         await new Promise(resolve => setTimeout(resolve, delay));
                     } else {
-                        throw new Error(`HTTP Error: ${fetchResponse.status} ${fetchResponse.statusText}`);
+                        // Check for backend error response structure
+                        const errorBody = await fetchResponse.json();
+                        throw new Error(`Backend Error: ${errorBody.details || fetchResponse.statusText}`);
                     }
                 } catch (e) {
                     if (i === maxRetries - 1) {
                         console.error('API call failed after retries:', e);
-                        displayError(`Failed to connect to the Gemini API. Details: ${e.message}`);
+                        displayError(`Failed to connect to the Brand Concierge service. Details: ${e.message}. Did you set the GEMINI_API_KEY environment variable in Vercel?`);
                         return;
                     }
                     const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
@@ -292,13 +209,11 @@
                 }
             }
 
-            // Process the response
+            // Process the structured result from the backend
             try {
-                const jsonText = response.candidates[0].content.parts[0].text;
-                const result = JSON.parse(jsonText);
-
+                // The result is already a parsed JSON object from the backend function
                 const reply = result.conversational_reply || "I encountered an issue processing the request. Please try rephrasing.";
-                // Check for 'Found' status and ensure the link is a valid string
+                
                 const link = (result.status === 'Found' && result.recommended_link && result.recommended_link.length > 0) 
                              ? result.recommended_link 
                              : null;
@@ -306,9 +221,9 @@
                 appendMessage('bot', reply, link);
 
             } catch (e) {
-                console.error("Error processing Gemini response:", e);
-                // Fallback bot response for unparseable JSON
-                appendMessage('bot', "I apologize, I'm having trouble processing that request right now. Please try a different question or contact the design team directly.");
+                console.error("Error processing response from backend:", e);
+                // Fallback bot response for unexpected JSON or structure
+                appendMessage('bot', "I apologize, I'm having trouble understanding the backend response. Please try a different question.");
 
             } finally {
                 // Final UI state cleanup
