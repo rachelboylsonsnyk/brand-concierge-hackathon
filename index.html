@@ -34,6 +34,7 @@
             height: calc(85vh - 100px); 
             max-height: 80vh;
             overflow-y: auto;
+            /* FIX: Removed space-y, relying solely on mt-4 in JS */
             display: flex;
             flex-direction: column-reverse; 
         }
@@ -106,7 +107,7 @@
             <!-- CHAT VIEW CONTAINER -->
             <div id="chatView" class="flex flex-col flex-grow">
                 <!-- Chat Messages Display -->
-                <div id="chatMessages" class="chat-container flex-grow space-y-4"> 
+                <div id="chatMessages" class="chat-container flex-grow"> 
                     <!-- Messages will be appended here -->
                 </div>
 
@@ -287,8 +288,9 @@
 
         function appendMessage(sender, text, link = null) {
             const messageElement = document.createElement('div');
-            // FIX: Standardize horizontal spacing for consistent look (Added px-2)
-            messageElement.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'} mb-4 mx-2`; 
+            // FIX: Standardize horizontal spacing for consistent look (mx-2)
+            // FIX: Replaced mb-4 with mt-4 for correct column-reverse spacing.
+            messageElement.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'} mt-4 mx-2`; 
 
             const content = document.createElement('div');
             // Bold the link available token
