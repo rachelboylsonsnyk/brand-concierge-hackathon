@@ -49,6 +49,17 @@
             border-bottom: 2px solid #6366f1; /* Tailwind indigo-500 equivalent */
             font-weight: 500;
         }
+
+        /* FIX: Custom CSS for hanging indentation in Vercel environment */
+        .hanging-indent {
+            list-style: disc;
+            padding-left: 1.5rem; /* Standard bullet indentation */
+        }
+        /* This rule ensures wrapped lines align with the start of the text */
+        .hanging-indent li {
+            text-indent: -1.5rem; /* Negative indent moves the text back */
+            padding-left: 1.5rem; /* Positive padding pushes the text back under the first line */
+        }
     </style>
 </head>
 <body>
@@ -119,7 +130,7 @@
                     
                     <!-- Team Member 1: Caleb Minns -->
                     <div class="p-4 bg-[#525a99] rounded-lg shadow-xl text-center">
-                        <img src="uploaded:exactly.ai_NeonCanineChronicles_UsingTheAttachedImageCreateThisPersonInTheStyleOf_2025-09-29_18-25.png" 
+                        <img src="/assets/images/caleb.png" 
                              alt="Headshot for Caleb Minns" 
                              class="w-20 h-20 rounded-full mx-auto mb-3 border-4 border-indigo-400">
                         <p class="font-semibold text-white">Caleb Minns</p>
@@ -130,14 +141,14 @@
                     <div class="p-4 bg-[#525a99] rounded-lg shadow-xl text-center">
                         <img src="https://placehold.co/100x100/4f46e5/ffffff?text=DE" 
                              alt="Placeholder headshot for Dan Edwards" 
-                             class="w-20 h-20 rounded-full mx-auto mb-3 border-4 border-indigo-400">
+                             class="class="w-20 h-20 rounded-full mx-auto mb-3 border-4 border-indigo-400"">
                         <p class="font-semibold text-white">Dan Edwards</p>
                         <p class="text-sm text-gray-300">Senior Manager, Brand</p>
                     </div>
                     
                     <!-- Team Member 3: Rachel Boylson -->
                     <div class="p-4 bg-[#525a99] rounded-lg shadow-xl text-center">
-                        <img src="uploaded:exactly.ai_NeonCanineChronicles_UseTheAttachedImageAndRe-createInMyStyleIgnoreThe_2025-09-29_17-02.jpeg" 
+                        <img src="/assets/images/rachel.jpeg" 
                              alt="Headshot for Rachel Boylson" 
                              class="w-20 h-20 rounded-full mx-auto mb-3 border-4 border-indigo-400">
                         <p class="font-semibold text-white">Rachel Boylson</p>
@@ -152,8 +163,8 @@
                 </p>
                 
                 <h3 class="text-xl font-semibold mb-2 mt-4">Technical Execution:</h3>
-                <!-- FIX: Removed list-inside and added pl-6 for correct hanging indentation -->
-                <ul class="list-disc space-y-2 text-gray-400 pl-6"> 
+                <!-- FIX: Added custom hanging-indent class -->
+                <ul class="hanging-indent space-y-2 text-gray-400"> 
                     <li><strong>Knowledge Base:</strong> Team guidelines are sourced from a dynamic, AI-curated knowledge repository.</li>
                     <li><strong>Gemini 2.5 Flash API:</strong> Used for hyper-efficient <strong>structured JSON output</strong> (reply, status, and link), ensuring reliable data parsing on the frontend.</li>
                     <li><strong>Empathy Prompting:</strong> The system instruction guides the AI to reply with a warm, supportive, and conversational tone, turning a static document into a friendly assistant.</li>
@@ -171,22 +182,22 @@
                 
                 <h3 class="text-xl font-semibold mb-2 mt-4 text-white"><i data-lucide="zap" class="w-5 h-5 inline-block mr-1 text-yellow-400"></i> Innovation & Creativity</h3>
                 <p class="text-gray-400 mb-2">Goal: <strong>Pushing the idea further</strong> by moving beyond text retrieval.</p>
-                <!-- FIX: Removed list-inside and added pl-6 for correct hanging indentation -->
-                <ul class="list-disc space-y-2 text-gray-400 pl-6"> 
+                <!-- FIX: Added custom hanging-indent class -->
+                <ul class="hanging-indent space-y-2 text-gray-400"> 
                     <li><strong>AI Visual Compliance Check:</strong> Allow users to upload a design and ask, "Does this color match brand guidelines?" The AI would use <strong>Image Understanding</strong> to verify colors and fonts in the image against the internal knowledge base rules.</li>
                 </ul>
 
                 <h3 class="text-xl font-semibold mb-2 mt-4 text-white"><i data-lucide="cpu" class="w-5 h-5 inline-block mr-1 text-green-400"></i> Execution & Usability</h3>
                 <p class="text-gray-400 mb-2">Goal: <strong>Automate daily work</strong> and ensure the solution is robust and usable.</p>
-                <!-- FIX: Removed list-inside and added pl-6 for correct hanging indentation -->
-                <ul class="list-disc space-y-2 text-gray-400 pl-6"> 
+                <!-- FIX: Added custom hanging-indent class -->
+                <ul class="hanging-indent space-y-2 text-gray-400"> 
                     <li><strong>Live Source Integration:</strong> Replace the static knowledge file with a direct, automated fetch from <strong>Figma, Notion, or Confluence</strong> via their APIs, ensuring the knowledge is always up-to-date without manual intervention.</li>
                 </ul>
                 
                 <h3 class="text-xl font-semibold mb-2 mt-4 text-white"><i data-lucide="trending-up" class="w-5 h-5 inline-block mr-1 text-red-400"></i> Impact & ROI</h3>
                 <p class="text-gray-400 mb-2">Goal: <strong>Quantifiable time savings</strong> and risk reduction for the marketing team.</p>
-                <!-- FIX: Removed list-inside and added pl-6 for correct hanging indentation -->
-                <ul class="list-disc space-y-2 text-gray-400 pl-6"> 
+                <!-- FIX: Added custom hanging-indent class -->
+                <ul class="hanging-indent space-y-2 text-gray-400"> 
                     <li><strong>Multi-User Authentication & Logging:</strong> Implement secure login and track usage metrics (e.g., "AI saved 50 hours of designer search time this month"). This allows for a clear <strong>ROI calculation</strong> to justify scaling the project.</li>
                 </ul>
             </div> <!-- End Future View -->
