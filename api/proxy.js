@@ -29,6 +29,7 @@ export default async function handler(request, response) {
         knowledgeBaseContent = await fs.readFile(knowledgeFilePath, 'utf-8');
 
         // 🛑 CRITICAL FIX: Strip the Byte Order Mark (BOM) if present.
+        // This prevents invisible characters from corrupting the JSON payload sent to Gemini.
         if (knowledgeBaseContent.charCodeAt(0) === 0xFEFF) {
             knowledgeBaseContent = knowledgeBaseContent.slice(1);
         }
@@ -56,7 +57,7 @@ export default async function handler(request, response) {
             1. You **MUST** prioritize the **KNOWLEDGE_BASE DOCUMENT**.
             2. If the question relates to a **brand-specific** topic (e.g., color, logo), provide the direct answer.
             3. If the knowledge base contains an entry with the **Topic set to "Non-Brand question"**, your conversational_reply MUST include a gentle disclaimer like, "While that isn't specifically a core brand-compliance question, I can certainly point you in the right direction:" followed by the answer and link.
-            4. If the answer is not in the Knowledge Base, your conversational_reply must politely state, "I cannot find specific guidance on that in the current knowledge document."
+            4. 🛑 **FINAL FALLBACK RULE:** If the answer is NOT in the knowledge base, your conversational_reply MUST state: "I haven't found that in the current knowledge base. For further assistance, please reach out directly to the team in the #ask-brand-design Slack channel." and the recommended_link MUST be set to: https://snyk.enterprise.slack.com/archives/C041RSP2LG2.
             5. You MUST always return a valid JSON object matching the requested schema.
 
             KNOWLEDGE_BASE DOCUMENT:
@@ -113,7 +114,9 @@ export default async function handler(request, response) {
 
         // 🛑 FIX: Post-process the link to remove Google Search prefixes if Gemini injected them.
         const link = parsedJson.recommended_link;
-        if (link && link.startsWith("https://www.google.com/search")) {
+        const googleSearchPrefix = "https://www.google.com/search";
+        
+        if (link && link.startsWith(googleSearchPrefix)) {
              // Attempt to extract the original URL from the 'q=' parameter (if present)
              const urlParams = new URLSearchParams(link.split('?')[1]);
              const originalUrl = urlParams.get('q');
