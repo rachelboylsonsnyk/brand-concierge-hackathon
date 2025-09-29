@@ -288,7 +288,6 @@
 
         function appendMessage(sender, text, link = null) {
             const messageElement = document.createElement('div');
-            // FIX: Standardize horizontal spacing for consistent look (mx-2)
             // FIX: Replaced mb-4 with mt-4 for correct column-reverse spacing.
             messageElement.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'} mt-4 mx-2`; 
 
