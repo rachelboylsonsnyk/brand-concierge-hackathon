@@ -27,6 +27,13 @@ export default async function handler(request, response) {
         // Construct the path to the knowledge base file
         const knowledgeFilePath = path.join(process.cwd(), 'knowledge_base.txt');
         knowledgeBaseContent = await fs.readFile(knowledgeFilePath, 'utf-8');
+
+        // 🛑 CRITICAL FIX: Strip the Byte Order Mark (BOM) if present.
+        // This prevents invisible characters from corrupting the JSON payload sent to Gemini.
+        if (knowledgeBaseContent.charCodeAt(0) === 0xFEFF) {
+            knowledgeBaseContent = knowledgeBaseContent.slice(1);
+        }
+
     } catch (error) {
         console.error("Knowledge Base Read Error:", error);
         return response.status(500).json({ 
