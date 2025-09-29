@@ -4,16 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brand Concierge Chatbot</title>
+    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FIX: Load Space Grotesk font -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
     
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* FIX: Change font-family from 'Inter' to 'Roboto' */
+        /* DARK MODE FIX: Set main background color */
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f7f9fb;
+            /* FIX: Change font-family to 'Space Grotesk' */
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #383f76; /* Your specified dark mode background */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -21,23 +25,29 @@
             padding: 1rem;
         }
         .chat-container {
-            height: 75vh;
+            height: calc(85vh - 100px); /* Adjusted height to fit within the card */
             max-height: 80vh;
             overflow-y: auto;
             display: flex;
             flex-direction: column-reverse; 
         }
+        /* DARK MODE FIX: Define the card background (slightly lighter for contrast) */
         .card {
-            background-color: white;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2p x rgba(0, 0, 0, 0.05);
+            background-color: #424a87; /* Darker blue shade */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
         }
         .loading-spinner {
-            border-top-color: #3b82f6;
+            border-top-color: #92e0ff; /* Light color for spinner */
             animation: spin 1s ease-in-out infinite;
         }
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+        /* Style for the active tab indicator */
+        .tab-active {
+            border-bottom: 2px solid #6366f1; /* Tailwind indigo-500 equivalent */
+            font-weight: 500;
         }
     </style>
 </head>
@@ -45,38 +55,131 @@
 
     <div id="app" class="w-full max-w-2xl">
         <header class="text-center mb-6">
-            <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight mb-1">
-                <span class="text-indigo-600">Brand</span> Concierge AI
+            <!-- START Logo Placeholder: Using a large Lucide icon for a clean, modern look -->
+            <div class="mb-4 flex justify-center">
+                <i data-lucide="bot" class="w-16 h-16 text-indigo-400"></i>
+            </div>
+            <!-- END Logo Placeholder -->
+            <h1 class="text-3xl font-extrabold text-white tracking-tight mb-1">
+                <span class="text-indigo-400">Brand</span> Concierge AI
             </h1>
-            <p class="text-gray-500 text-sm">Your instant guide to design guidelines and assets. Ask away!</p>
+            <p class="text-gray-400 text-sm">Your instant guide to design guidelines and assets. Ask away!</p>
         </header>
 
+        <!-- Tab Interface Card -->
         <div class="card rounded-xl flex flex-col h-[85vh]">
             
-            <div id="chatMessages" class="chat-container flex-grow p-4 md:p-6 space-y-4">
+            <!-- Navigation Tabs -->
+            <nav class="flex border-b border-gray-600">
+                <button id="chatTab" onclick="showTab('chat')" class="flex-1 p-3 text-center text-gray-300 hover:bg-[#525a99] transition-colors tab-active">
+                    <i data-lucide="message-square" class="w-4 h-4 inline-block mr-1"></i> Chat
+                </button>
+                <button id="aboutTab" onclick="showTab('about')" class="flex-1 p-3 text-center text-gray-300 hover:bg-[#525a99] transition-colors">
+                    <i data-lucide="info" class="w-4 h-4 inline-block mr-1"></i> About
+                </button>
+                <button id="futureTab" onclick="showTab('future')" class="flex-1 p-3 text-center text-gray-300 hover:bg-[#525a99] transition-colors">
+                    <i data-lucide="rocket" class="w-4 h-4 inline-block mr-1"></i> Future
+                </button>
+            </nav>
+            
+            <!-- CHAT VIEW CONTAINER -->
+            <div id="chatView" class="flex flex-col flex-grow">
+                <!-- Chat Messages Display -->
+                <div id="chatMessages" class="chat-container flex-grow p-4 md:p-6 space-y-4">
+                    <!-- Messages will be appended here -->
                 </div>
 
-            <div class="p-4 border-t border-gray-200">
+                <!-- Input Area -->
+                <div class="p-4 border-t border-gray-600">
+                    
+                    <div id="loadingIndicator" class="hidden flex items-center justify-center py-2 text-indigo-400">
+                        <div class="loading-spinner w-4 h-4 border-2 border-t-2 border-gray-600 rounded-full mr-2"></div>
+                        Thinking...
+                    </div>
+                    <div class="flex">
+                        <!-- DARK MODE FIX: Changed input background, text, and border colors -->
+                        <input type="text" id="userInput" placeholder="E.g., Where is the main logo file?" class="flex-grow p-3 border border-gray-600 rounded-l-lg focus:ring-indigo-500 focus:border-indigo-500 bg-gray-700 text-white placeholder-gray-400" onkeydown="if(event.key === 'Enter') sendMessage()">
+                        <button id="sendButton" onclick="sendMessage()" class="px-4 py-3 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700 transition duration-150 ease-in-out disabled:opacity-50 flex items-center justify-center">
+                            <i data-lucide="send" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <!-- DARK MODE FIX: Changed error box colors -->
+                    <div id="errorBox" class="hidden mt-2 p-3 text-sm text-red-300 bg-red-800 rounded-lg" role="alert">
+                        <span class="font-bold">Error:</span> <span id="errorMessage"></span>
+                    </div>
+                </div>
+            </div> <!-- End Chat View -->
+
+            <!-- ABOUT VIEW CONTAINER -->
+            <div id="aboutView" class="flex-grow p-6 text-gray-300 overflow-y-auto hidden">
+                <h2 class="text-2xl font-bold mb-4 text-indigo-400">About the Brand Concierge: Hackathon Edition</h2>
+                <p class="mb-6">
+                    The **Brand Concierge AI** was developed to eliminate the "where is that file?" and "what's the hex code?" friction that plagues design and marketing teams. This project demonstrates a working **AI-grounded knowledge base** delivered in a responsive, modern web app.
+                </p>
                 
-                <div id="loadingIndicator" class="hidden flex items-center justify-center py-2 text-indigo-600">
-                    <div class="loading-spinner w-4 h-4 border-2 border-t-2 border-gray-200 rounded-full mr-2"></div>
-                    Thinking...
+                <h3 class="text-xl font-semibold mb-2 mt-4">Technical Execution:</h3>
+                <ul class="list-disc list-inside space-y-2 pl-4 text-gray-400 mb-6">
+                    <li>**Knowledge Base:** Team guidelines are sourced from the **<code class="bg-gray-700 p-1 rounded">knowledge_base.txt</code>** file (simulating a live API feed).</li>
+                    <li>**Gemini 2.5 Flash API:** Used for hyper-efficient **structured JSON output** (reply, status, and link), ensuring reliable data parsing on the frontend.</li>
+                    <li>**Empathy Prompting:** The system instruction guides the AI to reply with a warm, supportive, and conversational tone, turning a static document into a friendly assistant.</li>
+                    <li>**Proxy Architecture:** A Vercel **Node.js Proxy** securely handles the API key and file reading, ensuring stable deployment even with complex environment constraints.</li>
+                </ul>
+
+                <!-- START TEAM SECTION -->
+                <h3 class="text-2xl font-bold mb-4 text-indigo-400 border-t border-gray-600 pt-4 mt-4">Meet the Team</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    
+                    <!-- Team Member 1 -->
+                    <div class="p-4 bg-[#525a99] rounded-lg shadow-xl text-center">
+                        <img src="https://placehold.co/100x100/4f46e5/ffffff?text=RB" 
+                             alt="Placeholder headshot for Rachel Boylson" 
+                             class="w-20 h-20 rounded-full mx-auto mb-3 border-4 border-indigo-400">
+                        <p class="font-semibold text-white">Rachel Boylson</p>
+                        <p class="text-sm text-gray-300">Web Producer</p>
+                    </div>
+
+                    <!-- Team Member 2 -->
+                    <div class="p-4 bg-[#525a99] rounded-lg shadow-xl text-center">
+                        <img src="https://placehold.co/100x100/4f46e5/ffffff?text=DE" 
+                             alt="Placeholder headshot for Dan Edwards" 
+                             class="w-20 h-20 rounded-full mx-auto mb-3 border-4 border-indigo-400">
+                        <p class="font-semibold text-white">Dan Edwards</p>
+                        <p class="text-sm text-gray-300">Senior Manager, Brand</p>
+                    </div>
+
+                    <!-- Team Member 3 -->
+                    <div class="p-4 bg-[#525a99] rounded-lg shadow-xl text-center">
+                        <img src="https://placehold.co/100x100/4f46e5/ffffff?text=CM" 
+                             alt="Placeholder headshot for Caleb Minns" 
+                             class="w-20 h-20 rounded-full mx-auto mb-3 border-4 border-indigo-400">
+                        <p class="font-semibold text-white">Caleb Minns</p>
+                        <p class="text-sm text-gray-300">Internal Communications Manager</p>
+                    </div>
                 </div>
-                <div class="flex">
-                    <input type="text" id="userInput" placeholder="E.g., Where is the main logo file?" class="flex-grow p-3 border border-gray-300 rounded-l-lg focus:ring-indigo-500 focus:border-indigo-500" onkeydown="if(event.key === 'Enter') sendMessage()">
-                    <button id="sendButton" onclick="sendMessage()" class="px-4 py-3 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700 transition duration-150 ease-in-out disabled:opacity-50 flex items-center justify-center">
-                        <i data-lucide="send" class="w-5 h-5"></i>
-                    </button>
-                </div>
-                <div id="errorBox" class="hidden mt-2 p-3 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
-                    <span class="font-bold">Error:</span> <span id="errorMessage"></span>
-                </div>
-            </div>
+                <!-- END TEAM SECTION -->
+
+            </div> <!-- End About View -->
+            
+            <!-- FUTURE VIEW CONTAINER -->
+            <div id="futureView" class="flex-grow p-6 text-gray-300 overflow-y-auto hidden">
+                <h2 class="text-2xl font-bold mb-4 text-indigo-400">Future Roadmap: What Comes Next</h2>
+                <p class="mb-4">
+                    Given more time, these are the immediate features we would integrate to turn this hackathon project into a production-ready internal tool.
+                </p>
+                <h3 class="text-xl font-semibold mb-2">Key Enhancements:</h3>
+                <ul class="list-disc list-inside space-y-2 pl-4 text-gray-400">
+                    <li>**Image Understanding:** Allow users to upload a design and ask, "Does this color match the brand guidelines?" The AI would verify colors/fonts in the image against the knowledge base.</li>
+                    <li>**Live Source Integration:** Replace the static <code class="bg-gray-700 p-1 rounded">knowledge_base.txt</code> file with a direct, automated fetch from **Figma, Notion, or Confluence** via their APIs.</li>
+                    <li>**Google Search Grounding Re-integration:** Fix the structural issue preventing the use of the Google Search tool, allowing the AI to answer general questions (e.g., "latest accessibility standards") without relying solely on the internal document.</li>
+                    <li>**Multi-User Authentication:** Implement secure login for designers, marketers, and developers, potentially allowing different knowledge bases or permissions for each group.</li>
+                </ul>
+            </div> <!-- End Future View -->
+
+
         </div>
     </div>
 
     <script>
-        // Use the successful proxy endpoint
         const apiUrl = '/api/proxy'; 
 
         // UI elements
@@ -86,11 +189,46 @@
         const loadingIndicator = document.getElementById('loadingIndicator');
         const errorBox = document.getElementById('errorBox');
         const errorMessageSpan = document.getElementById('errorMessage');
+
+        // Tab elements
+        const chatView = document.getElementById('chatView');
+        const aboutView = document.getElementById('aboutView');
+        const futureView = document.getElementById('futureView'); 
+        const chatTab = document.getElementById('chatTab');
+        const aboutTab = document.getElementById('aboutTab');
+        const futureTab = document.getElementById('futureTab'); 
         
         document.addEventListener('DOMContentLoaded', () => {
-            appendMessage('bot', `Hello! I'm your **Brand Concierge**. I have been pre-loaded with the core design guidelines and can search the web for general design questions. Ask away!`);
+            appendMessage('bot', `Hello! I'm your **Brand Concierge**. I have been pre-loaded with the core design guidelines and can answer your questions with empathy!`);
             lucide.createIcons();
+            // Ensure the correct view is shown on load
+            showTab('chat'); 
         });
+
+        // Function to switch between tabs
+        function showTab(tabName) {
+            // Hide all views
+            chatView.classList.add('hidden');
+            aboutView.classList.add('hidden');
+            futureView.classList.add('hidden'); 
+            
+            // Remove active style from all tabs
+            chatTab.classList.remove('tab-active');
+            aboutTab.classList.remove('tab-active');
+            futureTab.classList.remove('tab-active'); 
+
+            // Show the selected view and set active class
+            if (tabName === 'chat') {
+                chatView.classList.remove('hidden');
+                chatTab.classList.add('tab-active');
+            } else if (tabName === 'about') {
+                aboutView.classList.remove('hidden');
+                aboutTab.classList.add('tab-active');
+            } else if (tabName === 'future') { 
+                futureView.classList.remove('hidden');
+                futureTab.classList.add('tab-active');
+            }
+        }
 
         function displayError(message) {
             errorMessageSpan.textContent = message;
@@ -108,10 +246,11 @@
             // Bold the link available token
             const formattedText = text.replace(/\[Link Available\]/g, '⚠️ **[Link Available]**');
 
+            // DARK MODE FIX: Changed bot message colors
             content.className = `max-w-[80%] p-3 rounded-xl shadow-md ${
                 sender === 'user'
                     ? 'bg-indigo-500 text-white rounded-br-none'
-                    : 'bg-white text-gray-800 rounded-tl-none border border-gray-200'
+                    : 'bg-[#424a87] text-gray-200 rounded-tl-none border border-gray-600' // Bot color matches card, text is light gray
             }`;
 
             content.innerHTML = `<p>${formattedText}</p>`;
@@ -120,13 +259,15 @@
                 const linkElement = document.createElement('a');
                 linkElement.href = link;
                 linkElement.target = '_blank';
-                linkElement.className = 'mt-2 inline-flex items-center text-sm font-medium text-indigo-500 hover:text-indigo-600 transition duration-150';
+                // DARK MODE FIX: Used lighter indigo for links against dark background
+                linkElement.className = 'mt-2 inline-flex items-center text-sm font-medium text-indigo-400 hover:text-indigo-300 transition duration-150';
                 linkElement.innerHTML = `<i data-lucide="external-link" class="w-4 h-4 mr-1"></i> View Relevant File`;
                 
                 setTimeout(() => lucide.createIcons(), 0);
 
                 const linkWrapper = document.createElement('div');
-                linkWrapper.className = 'mt-2 border-t pt-2 border-indigo-200';
+                // DARK MODE FIX: Used darker border for separation
+                linkWrapper.className = 'mt-2 border-t pt-2 border-gray-700'; 
                 linkWrapper.appendChild(linkElement);
                 content.appendChild(linkWrapper);
             }
@@ -137,6 +278,9 @@
         }
 
         async function sendMessage() {
+            // Prevent API calls if not on the Chat tab
+            if (chatView.classList.contains('hidden')) return;
+
             const query = userInput.value.trim();
             if (!query) return;
 
@@ -156,7 +300,6 @@
                     const fetchResponse = await fetch(apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        // Only send the query, as the KB is now read from file in the backend
                         body: JSON.stringify({ query: query }) 
                     });
                     
