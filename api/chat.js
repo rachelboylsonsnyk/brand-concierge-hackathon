@@ -35,6 +35,23 @@ const generationConfig = {
     }
 };
 
+/**
+ * Robustly initializes and returns the GoogleGenAI client.
+ * This is wrapped in a dedicated function for stability in serverless environments.
+ * @returns {GoogleGenAI} The initialized client.
+ * @throws {Error} if the API key is missing.
+ */
+function initializeAIClient() {
+    // CRITICAL CHECK: Ensure the key is available before initializing the client.
+    if (!process.env.GEMINI_API_KEY) {
+        throw new Error('Configuration Error: GEMINI_API_KEY environment variable not set on Vercel.');
+    }
+
+    return new GoogleGenAI({
+        apiKey: process.env.GEMINI_API_KEY,
+    });
+}
+
 // Vercel Serverless Function handler
 export default async function handler(request, response) {
     if (request.method !== 'POST') {
@@ -42,20 +59,11 @@ export default async function handler(request, response) {
         return;
     }
 
-    // CRITICAL CHECK: Ensure the key is available before initializing the client.
-    if (!process.env.GEMINI_API_KEY) {
-        // If the key is missing, return a proper JSON error that the frontend can read.
-        response.status(500).json({ error: 'Configuration Error: GEMINI_API_KEY environment variable not set on Vercel.' });
-        return;
-    }
-
-    // Initialize the GoogleGenAI client INSIDE the handler function.
-    // This is the key change for stability in serverless environments.
-    const ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY,
-    });
-    
+    let ai;
     try {
+        // Initialize the client first
+        ai = initializeAIClient();
+
         const { query, knowledgeBaseContent } = request.body;
 
         if (!query || !knowledgeBaseContent) {
@@ -93,10 +101,16 @@ export default async function handler(request, response) {
 
     } catch (error) {
         console.error("Gemini API Error:", error.message);
-        // If the Gemini API fails (e.g., 403, 400), we catch it here and return a proper JSON error.
-        response.status(500).json({
-            error: 'A server error occurred while communicating with the Brand Concierge service.',
-            details: error.message
-        });
+        
+        // This catch block handles both configuration errors (from initializeAIClient) 
+        // and Gemini API errors. We ensure the response is always JSON.
+        if (error.message.includes('Configuration Error')) {
+            response.status(500).json({ error: error.message });
+        } else {
+            response.status(500).json({
+                error: 'A server error occurred while communicating with the Brand Concierge service.',
+                details: error.message
+            });
+        }
     }
 }
