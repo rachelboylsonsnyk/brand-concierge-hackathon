@@ -148,15 +148,16 @@
                 
                 <h3 class="text-2xl font-bold mb-4 text-indigo-400 border-t border-gray-600 pt-4">About the Brand Concierge: Hackathon Edition</h3>
                 <p class="mb-4">
-                    The **Brand Concierge AI** was developed to **automate daily work** by providing a single, intelligent source of truth for design guidelines. This project helps eliminate the time spent searching for assets and rules, allowing stakeholders to easily find information and **simplify complex problems** related to brand compliance.
+                    The <strong>Brand Concierge AI</strong> was developed to <strong>automate daily work</strong> by providing a single, intelligent source of truth for design guidelines. This project helps eliminate the time spent searching for assets and rules, allowing stakeholders to easily find information and <strong>simplify complex problems</strong> related to brand compliance.
                 </p>
                 
                 <h3 class="text-xl font-semibold mb-2 mt-4">Technical Execution:</h3>
                 <ul class="list-disc list-inside space-y-2 pl-4 text-gray-400">
-                    <li>**Knowledge Base:** Team guidelines are sourced from the **<code class="bg-gray-700 p-1 rounded">knowledge_base.txt</code>** file (simulating a direct feed from an internal AI-curated knowledge repository).</li>
-                    <li>**Gemini 2.5 Flash API:** Used for hyper-efficient **structured JSON output** (reply, status, and link), ensuring reliable data parsing on the frontend.</li>
-                    <li>**Empathy Prompting:** The system instruction guides the AI to reply with a warm, supportive, and conversational tone, turning a static document into a friendly assistant.</li>
-                    <li>**Proxy Architecture:** A Vercel **Node.js Proxy** securely handles the API key and file reading, ensuring stable deployment even with complex environment constraints.</li>
+                    <!-- FIX: Converted ** to <strong> -->
+                    <li><strong>Knowledge Base:</strong> Team guidelines are sourced from a dynamic, AI-curated knowledge repository.</li>
+                    <li><strong>Gemini 2.5 Flash API:</strong> Used for hyper-efficient <strong>structured JSON output</strong> (reply, status, and link), ensuring reliable data parsing on the frontend.</li>
+                    <li><strong>Empathy Prompting:</strong> The system instruction guides the AI to reply with a warm, supportive, and conversational tone, turning a static document into a friendly assistant.</li>
+                    <li><strong>Proxy Architecture:</strong> A Vercel <strong>Node.js Proxy</strong> securely handles the API key and file reading, ensuring stable deployment even with complex environment constraints.</li>
                 </ul>
 
             </div> <!-- End About View -->
@@ -169,21 +170,21 @@
                 </p>
                 
                 <h3 class="text-xl font-semibold mb-2 mt-4 text-white"><i data-lucide="zap" class="w-5 h-5 inline-block mr-1 text-yellow-400"></i> Innovation & Creativity</h3>
-                <p class="text-gray-400 mb-2">Goal: **Pushing the idea further** by moving beyond text retrieval.</p>
+                <p class="text-gray-400 mb-2">Goal: <strong>Pushing the idea further</strong> by moving beyond text retrieval.</p>
                 <ul class="list-disc list-inside space-y-2 pl-4 text-gray-400">
-                    <li>**AI Visual Compliance Check:** Allow users to upload a design and ask, "Does this color match brand guidelines?" The AI would use **Image Understanding** to verify colors and fonts in the image against the internal knowledge base rules.</li>
+                    <li><strong>AI Visual Compliance Check:</strong> Allow users to upload a design and ask, "Does this color match brand guidelines?" The AI would use **Image Understanding** to verify colors and fonts in the image against the internal knowledge base rules.</li>
                 </ul>
 
                 <h3 class="text-xl font-semibold mb-2 mt-4 text-white"><i data-lucide="cpu" class="w-5 h-5 inline-block mr-1 text-green-400"></i> Execution & Usability</h3>
-                <p class="text-gray-400 mb-2">Goal: **Automate daily work** and ensure the solution is robust and usable.</p>
+                <p class="text-gray-400 mb-2">Goal: <strong>Automate daily work</strong> and ensure the solution is robust and usable.</p>
                 <ul class="list-disc list-inside space-y-2 pl-4 text-gray-400">
-                    <li>**Live Source Integration:** Replace the static <code class="bg-gray-700 p-1 rounded">knowledge_base.txt</code> file with a direct, automated fetch from **Figma, Notion, or Confluence** via their APIs, ensuring the knowledge is always up-to-date without manual intervention.</li>
+                    <li><strong>Live Source Integration:</strong> Replace the static knowledge file with a direct, automated fetch from <strong>Figma, Notion, or Confluence</strong> via their APIs, ensuring the knowledge is always up-to-date without manual intervention.</li>
                 </ul>
                 
                 <h3 class="text-xl font-semibold mb-2 mt-4 text-white"><i data-lucide="trending-up" class="w-5 h-5 inline-block mr-1 text-red-400"></i> Impact & ROI</h3>
-                <p class="text-gray-400 mb-2">Goal: **Quantifiable time savings** and risk reduction for the marketing team.</p>
+                <p class="text-gray-400 mb-2">Goal: <strong>Quantifiable time savings</strong> and risk reduction for the marketing team.</p>
                 <ul class="list-disc list-inside space-y-2 pl-4 text-gray-400">
-                    <li>**Multi-User Authentication & Logging:** Implement secure login and track usage metrics (e.g., "AI saved 50 hours of designer search time this month"). This allows for a clear **ROI calculation** to justify scaling the project.</li>
+                    <li><strong>Multi-User Authentication & Logging:</strong> Implement secure login and track usage metrics (e.g., "AI saved 50 hours of designer search time this month"). This allows for a clear <strong>ROI calculation</strong> to justify scaling the project.</li>
                 </ul>
             </div> <!-- End Future View -->
 
@@ -211,8 +212,8 @@
         const futureTab = document.getElementById('futureTab'); 
         
         document.addEventListener('DOMContentLoaded', () => {
-            // FIX: Removed the double-asterisk markdown from the initial message.
-            appendMessage('bot', `Hello! I'm your Brand Concierge. I have been pre-loaded with the core design guidelines and can answer your questions with empathy!`);
+            // FIX: Made "Brand Concierge" bold using <strong>
+            appendMessage('bot', `Hello! I'm your <strong>Brand Concierge</strong>. I have been pre-loaded with the core design guidelines and can answer your questions with empathy!`);
             lucide.createIcons();
             // Ensure the correct view is shown on load
             showTab('chat'); 
