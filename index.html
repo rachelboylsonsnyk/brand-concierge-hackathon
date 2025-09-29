@@ -90,7 +90,7 @@
                 </div>
 
                 <!-- Input Area -->
-                <div class="p-4 border-t border-gray-600">
+                <div class="p-3 border-t border-gray-600"> <!-- FIX APPLIED HERE: Changed p-4 to p-3 -->
                     
                     <div id="loadingIndicator" class="hidden flex items-center justify-center py-2 text-indigo-400">
                         <div class="loading-spinner w-4 h-4 border-2 border-t-2 border-gray-600 rounded-full mr-2"></div>
@@ -163,16 +163,27 @@
             
             <!-- FUTURE VIEW CONTAINER -->
             <div id="futureView" class="flex-grow p-6 text-gray-300 overflow-y-auto hidden">
-                <h2 class="text-2xl font-bold mb-4 text-indigo-400">Future Roadmap: What Comes Next</h2>
+                <h2 class="text-2xl font-bold mb-4 text-indigo-400">Future Roadmap: Aligned with Hackathon Criteria</h2>
                 <p class="mb-4">
-                    Given more time, these are the immediate features we would integrate to turn this hackathon project into a production-ready internal tool.
+                    The following features represent the next stages of development, showing how the Brand Concierge provides clear value against the hackathon judging criteria.
                 </p>
-                <h3 class="text-xl font-semibold mb-2">Key Enhancements:</h3>
+                
+                <h3 class="text-xl font-semibold mb-2 mt-4 text-white"><i data-lucide="zap" class="w-5 h-5 inline-block mr-1 text-yellow-400"></i> Innovation & Creativity</h3>
+                <p class="text-gray-400 mb-2">Goal: **Pushing the idea further** by moving beyond text retrieval.</p>
                 <ul class="list-disc list-inside space-y-2 pl-4 text-gray-400">
-                    <li>**Image Understanding:** Allow users to upload a design and ask, "Does this color match the brand guidelines?" The AI would verify colors/fonts in the image against the knowledge base.</li>
-                    <li>**Live Source Integration:** Replace the static <code class="bg-gray-700 p-1 rounded">knowledge_base.txt</code> file with a direct, automated fetch from **Figma, Notion, or Confluence** via their APIs.</li>
-                    <li>**Google Search Grounding Re-integration:** Fix the structural issue preventing the use of the Google Search tool, allowing the AI to answer general questions (e.g., "latest accessibility standards") without relying solely on the internal document.</li>
-                    <li>**Multi-User Authentication:** Implement secure login for designers, marketers, and developers, potentially allowing different knowledge bases or permissions for each group.</li>
+                    <li>**AI Visual Compliance Check:** Allow users to upload a design and ask, "Does this color match brand guidelines?" The AI would use **Image Understanding** to verify colors and fonts in the image against the internal knowledge base rules.</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold mb-2 mt-4 text-white"><i data-lucide="cpu" class="w-5 h-5 inline-block mr-1 text-green-400"></i> Execution & Usability</h3>
+                <p class="text-gray-400 mb-2">Goal: **Automate daily work** and ensure the solution is robust and usable.</p>
+                <ul class="list-disc list-inside space-y-2 pl-4 text-gray-400">
+                    <li>**Live Source Integration:** Replace the static <code class="bg-gray-700 p-1 rounded">knowledge_base.txt</code> file with a direct, automated fetch from **Figma, Notion, or Confluence** via their APIs, ensuring the knowledge is always up-to-date without manual intervention.</li>
+                </ul>
+                
+                <h3 class="text-xl font-semibold mb-2 mt-4 text-white"><i data-lucide="trending-up" class="w-5 h-5 inline-block mr-1 text-red-400"></i> Impact & ROI</h3>
+                <p class="text-gray-400 mb-2">Goal: **Quantifiable time savings** and risk reduction for the marketing team.</p>
+                <ul class="list-disc list-inside space-y-2 pl-4 text-gray-400">
+                    <li>**Multi-User Authentication & Logging:** Implement secure login and track usage metrics (e.g., "AI saved 50 hours of designer search time this month"). This allows for a clear **ROI calculation** to justify scaling the project.</li>
                 </ul>
             </div> <!-- End Future View -->
 
@@ -200,7 +211,8 @@
         const futureTab = document.getElementById('futureTab'); 
         
         document.addEventListener('DOMContentLoaded', () => {
-            appendMessage('bot', `Hello! I'm your **Brand Concierge**. I have been pre-loaded with the core design guidelines and can answer your questions with empathy!`);
+            // FIX: Removed the double-asterisk markdown from the initial message.
+            appendMessage('bot', `Hello! I'm your Brand Concierge. I have been pre-loaded with the core design guidelines and can answer your questions with empathy!`);
             lucide.createIcons();
             // Ensure the correct view is shown on load
             showTab('chat'); 
