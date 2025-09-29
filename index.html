@@ -82,7 +82,9 @@
 
     <script>
         // Global variables provided by the Canvas environment
-        const apiKey = 'AIzaSyDG4hf3-JR4W06e5wVG6C8G0eRVKk4QuFU';
+        // NOTE: You MUST replace 'PASTE_YOUR_FULL_API_KEY_HERE' with your actual, complete Gemini API key.
+        // The key must be the full, long string (starts with 'AIzaSy...' and is 39 characters long).
+        const apiKey = 'AIzaSyDG4hf3-JR4W06e5wVG6C8G0eRVKk4QuFU'; 
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
         // UI elements
@@ -200,6 +202,13 @@
             userInput.disabled = true;
             loadingIndicator.classList.remove('hidden');
             errorBox.classList.add('hidden');
+            
+            // Check if API key is still the placeholder
+            if (apiKey === 'PASTE_YOUR_FULL_API_KEY_HERE' || apiKey === '') {
+                 displayError("API Key is missing or invalid. Please replace 'PASTE_YOUR_FULL_API_KEY_HERE' in the code with your complete 39-character key.");
+                 return;
+            }
+
 
             // --- Gemini API Setup: System Prompt & Structured Output ---
             const systemPrompt = `
