@@ -1,6 +1,5 @@
-// --- FINAL FIX: Using Namespace Import to resolve constructor conflict ---
-// This pattern forces the module to load correctly in Vercel's Node.js environment.
-import * as GenerativeAI from '@google/generative-ai'; 
+// Import the specific class directly. This is the most reliable pattern.
+import { GoogleGenAI } from '@google/generative-ai';
 
 // Define the system instructions that give the AI its 'Brand Concierge' persona
 const systemPrompt = `
@@ -53,9 +52,8 @@ function initializeAIClient() {
         throw new Error('Configuration Error: GEMINI_API_KEY environment variable not set on Vercel.');
     }
 
-    // FIX: Access the class via the namespace/root object: GenerativeAI.GoogleGenAI
-    // This resolves the "Cannot read properties of undefined" error.
-    return new GenerativeAI.GoogleGenAI({ 
+    // Now we use the directly imported class name
+    return new GoogleGenAI({ 
         apiKey: key,
     });
 }
