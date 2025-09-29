@@ -47,7 +47,18 @@ function initializeAIClient() {
         throw new Error('Configuration Error: GEMINI_API_KEY environment variable not set on Vercel.');
     }
 
-    return new GoogleGenAI({
+    // FIX: Destructure GoogleGenAI from the import structure
+    const { GoogleGenAI: Client } = require('@google/generative-ai'); 
+    
+    // Check if Client is a function/constructor
+    if (typeof Client !== 'function') {
+        // Fallback for environments that export the client class directly as the default
+        return new GoogleGenAI({
+            apiKey: process.env.GEMINI_API_KEY,
+        });
+    }
+
+    return new Client({
         apiKey: process.env.GEMINI_API_KEY,
     });
 }
