@@ -1,3 +1,7 @@
+// --- FINAL FIX: Use the standard ES Module import structure ---
+// Vercel deployment logs suggest forcing ESM to resolve constructor issue.
+import * as GenerativeAI from '@google/generative-ai'; 
+
 // Define the system instructions that give the AI its 'Brand Concierge' persona
 const systemPrompt = `
     You are the "Brand Concierge," a friendly, expert, and hyper-efficient AI assistant for the design team.
@@ -35,7 +39,6 @@ const generationConfig = {
 
 /**
  * Robustly initializes and returns the GoogleGenAI client.
- * This function uses the most resilient module loading pattern to guarantee the constructor is found.
  * @returns {object} The initialized client instance.
  * @throws {Error} if the API key is missing.
  */
@@ -49,15 +52,8 @@ function initializeAIClient() {
         throw new Error('Configuration Error: GEMINI_API_KEY environment variable not set on Vercel.');
     }
 
-    // FINAL FIX: Use non-destructured require(). This accesses the root module object 
-    // and relies on the default export structure, solving the "not a constructor" issue 
-    // in complex runtime environments like Vercel.
-    const GenerativeAIModule = require('@google/generative-ai'); 
-
-    // The actual class constructor is often nested under the root object.
-    const GoogleGenAI = GenerativeAIModule.GoogleGenAI || GenerativeAIModule.default.GoogleGenAI || GenerativeAIModule.default;
-
-    return new GoogleGenAI({
+    // FIX: Access the class via the namespace/root object: GenerativeAI.GoogleGenAI
+    return new GenerativeAI.GoogleGenAI({ 
         apiKey: key,
     });
 }
