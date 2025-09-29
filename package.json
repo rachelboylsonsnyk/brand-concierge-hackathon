@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Dependencies for the Vercel Serverless Function",
   "main": "api/chat.js",
-  "type": "module",  // <-- THIS IS CRITICAL FOR 'import' to work
+  "type": "module",
   "dependencies": {
     "@google/generative-ai": "^0.1.0"
   },
