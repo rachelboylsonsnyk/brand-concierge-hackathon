@@ -304,12 +304,26 @@
             content.innerHTML = `<p>${formattedText}</p>`;
 
             if (link && link !== 'None') {
+                
+                // --- FIX: Dynamic Link Logic ---
+                let linkText = 'View Relevant File';
+                let linkIcon = 'external-link';
+                
+                if (link.includes('slack.com') || link.includes('#ask-')) {
+                    linkText = 'Go to Slack Channel';
+                    linkIcon = 'message-square';
+                } else if (link.includes('jira') || link.includes('saasjet')) {
+                    linkText = 'Open Jira Request Form';
+                    linkIcon = 'briefcase';
+                }
+                // --- END Dynamic Link Logic ---
+
                 const linkElement = document.createElement('a');
                 linkElement.href = link;
                 linkElement.target = '_blank';
                 // Use new neon accent for links
                 linkElement.className = 'mt-2 inline-flex items-center text-sm font-medium text-[#FD00F9] hover:text-white transition duration-150';
-                linkElement.innerHTML = `<i data-lucide="external-link" class="w-4 h-4 mr-1"></i> View Relevant File`;
+                linkElement.innerHTML = `<i data-lucide="${linkIcon}" class="w-4 h-4 mr-1"></i> ${linkText}`;
                 
                 setTimeout(() => lucide.createIcons(), 0);
 
