@@ -83,4 +83,137 @@
         const chatMessages = document.getElementById('chatMessages');
         const userInput = document.getElementById('userInput');
         const sendButton = document.getElementById('sendButton');
-        const
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const errorBox = document.getElementById('errorBox');
+        const errorMessageSpan = document.getElementById('errorMessage');
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            appendMessage('bot', `Hello! I'm your **Brand Concierge**. I have been pre-loaded with the core design guidelines and can search the web for general design questions. Ask away!`);
+            lucide.createIcons();
+        });
+
+        function displayError(message) {
+            errorMessageSpan.textContent = message;
+            errorBox.classList.remove('hidden');
+            loadingIndicator.classList.add('hidden');
+            sendButton.disabled = false;
+            userInput.disabled = false;
+        }
+
+        function appendMessage(sender, text, link = null) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`;
+
+            const content = document.createElement('div');
+            // Bold the link available token
+            const formattedText = text.replace(/\[Link Available\]/g, '⚠️ **[Link Available]**');
+
+            content.className = `max-w-[80%] p-3 rounded-xl shadow-md ${
+                sender === 'user'
+                    ? 'bg-indigo-500 text-white rounded-br-none'
+                    : 'bg-white text-gray-800 rounded-tl-none border border-gray-200'
+            }`;
+
+            content.innerHTML = `<p>${formattedText}</p>`;
+
+            if (link && link !== 'None') {
+                const linkElement = document.createElement('a');
+                linkElement.href = link;
+                linkElement.target = '_blank';
+                linkElement.className = 'mt-2 inline-flex items-center text-sm font-medium text-indigo-500 hover:text-indigo-600 transition duration-150';
+                linkElement.innerHTML = `<i data-lucide="external-link" class="w-4 h-4 mr-1"></i> View Relevant File`;
+                
+                setTimeout(() => lucide.createIcons(), 0);
+
+                const linkWrapper = document.createElement('div');
+                linkWrapper.className = 'mt-2 border-t pt-2 border-indigo-200';
+                linkWrapper.appendChild(linkElement);
+                content.appendChild(linkWrapper);
+            }
+
+            messageElement.appendChild(content);
+            chatMessages.prepend(messageElement); 
+            chatMessages.scrollTop = chatMessages.scrollHeight; 
+        }
+
+        async function sendMessage() {
+            const query = userInput.value.trim();
+            if (!query) return;
+
+            appendMessage('user', query);
+            userInput.value = '';
+
+            sendButton.disabled = true;
+            userInput.disabled = true;
+            loadingIndicator.classList.remove('hidden');
+            errorBox.classList.add('hidden');
+            
+            const maxRetries = 3;
+            let result = null;
+
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const fetchResponse = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        // Only send the query, as the KB is now read from file in the backend
+                        body: JSON.stringify({ query: query }) 
+                    });
+                    
+                    if (fetchResponse.ok) {
+                        result = await fetchResponse.json();
+                        break; 
+                    } else if (fetchResponse.status === 429 && i < maxRetries - 1) {
+                        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    } else {
+                        let errorDetails = fetchResponse.statusText;
+                        try {
+                            const errorBody = await fetchResponse.json();
+                            errorDetails = errorBody.details || errorBody.error || fetchResponse.statusText;
+                        } catch (e) {
+                            try {
+                                errorDetails = await fetchResponse.text();
+                                if (errorDetails.length > 200) {
+                                    errorDetails = errorDetails.substring(0, 200) + '...';
+                                }
+                            } catch (textError) {
+                                
+                            }
+                        }
+                        throw new Error(`Backend Error (Status ${fetchResponse.status}): ${errorDetails}`);
+                    }
+                } catch (e) {
+                    if (i === maxRetries - 1) {
+                        console.error('API call failed after retries:', e);
+                        displayError(`Failed to connect to the Brand Concierge service. Details: ${e.message}. Did you set the GEMINI_API_KEY environment variable in Vercel?`);
+                        return;
+                    }
+                    const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+
+            try {
+                const reply = result.conversational_reply || "I encountered an issue processing the request. Please try rephrasing.";
+                
+                const link = (result.status === 'SUCCESS' && result.recommended_link && result.recommended_link !== 'None') 
+                             ? result.recommended_link 
+                             : null;
+                
+                appendMessage('bot', reply, link);
+
+            } catch (e) {
+                console.error("Error processing response from backend:", e);
+                appendMessage('bot', "I apologize, I'm having trouble understanding the backend response. Please try a different question.");
+
+            } finally {
+                loadingIndicator.classList.add('hidden');
+                sendButton.disabled = false;
+                userInput.disabled = false;
+                userInput.focus();
+            }
+        }
+    </script>
+</body>
+</html>
