@@ -1,0 +1,12 @@
+{
+  "name": "brand-concierge-backend",
+  "version": "1.0.0",
+  "description": "Dependencies for the Vercel Serverless Function",
+  "main": "api/chat.js",
+  "dependencies": {
+    "@google/genai": "^0.1.0"
+  },
+  "scripts": {
+    "start": "node api/chat.js"
+  }
+}
