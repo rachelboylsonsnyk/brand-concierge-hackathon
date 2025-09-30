@@ -156,8 +156,8 @@
                 
                 <!-- NEW: Responsive video player -->
                 <div class="aspect-video w-full max-w-lg mx-auto rounded-xl overflow-hidden shadow-2xl mt-8">
-                    <!-- REMOVED autoplay attribute -->
-                    <video controls muted playsinline class="w-full h-full object-cover" poster="https://placehold.co/1280x720/145DEB/ffffff?text=Video+Placeholder">
+                    <!-- REMOVED 'muted' attribute to enable sound by default -->
+                    <video controls playsinline class="w-full h-full object-cover" poster="https://placehold.co/1280x720/145DEB/ffffff?text=Video+Placeholder">
                         <source src="/assets/images/video.mp4" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
@@ -175,7 +175,8 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
                     
                     <!-- Team Member 1: Caleb Minns -->
-                    <div class="p-4 bg-[#1D1D4D] rounded-lg shadow-xl text-center">
+                    <!-- UPDATED: p-4 changed to py-4 px-2 -->
+                    <div class="py-4 px-2 bg-[#1D1D4D] rounded-lg shadow-xl text-center">
                         <img src="/assets/images/caleb.png" 
                              alt="Headshot for Caleb Minns" 
                              class="w-24 h-24 rounded-full mx-auto mb-3 border-4 border-[#FD00F9]">
@@ -185,7 +186,8 @@
                     </div>
 
                     <!-- Team Member 2: Dan Edwards -->
-                    <div class="p-4 bg-[#1D1D4D] rounded-lg shadow-xl text-center">
+                    <!-- UPDATED: p-4 changed to py-4 px-2 -->
+                    <div class="py-4 px-2 bg-[#1D1D4D] rounded-lg shadow-xl text-center">
                         <img src="/assets/images/dan.png" 
                              alt="Headshot for Dan Edwards" 
                              class="w-24 h-24 rounded-full mx-auto mb-3 border-4 border-[#FD00F9]">
@@ -195,7 +197,8 @@
                     </div>
                     
                     <!-- Team Member 3: Rachel Boylson -->
-                    <div class="p-4 bg-[#1D1D4D] rounded-lg shadow-xl text-center">
+                    <!-- UPDATED: p-4 changed to py-4 px-2 -->
+                    <div class="py-4 px-2 bg-[#1D1D4D] rounded-lg shadow-xl text-center">
                         <img src="/assets/images/rachel.png" 
                              alt="Headshot for Rachel Boylson" 
                              class="w-24 h-24 rounded-full mx-auto mb-3 border-4 border-[#FD00F9]">
@@ -215,7 +218,7 @@
 
                 <h3 class="text-2xl font-bold mb-4 text-[#FD00F9] border-t border-gray-600 pt-4">About the Brand Concierge</h3>
                 <p class="mb-4">
-                    The <strong>Brand Concierge AI</strong> was developed to <strong>automate daily work</strong> by providing a single, intelligent source of truth for design guidelines. This project helps eliminate the time spent searching for assets and rules, allowing stakeholders to easily find information and <strong>simplify complex problems</strong> related to brand compliance.
+                    The <strong>Brand Concierge AI</strong> was developed to <strong>automate daily work</strong> by providing a single, intelligent source of truth for design guidelines. This project helps eliminate the time spent searching for assets and rules, allowing stakeholders to easily find information and <strong>simplify complex problems</strong> related to brand compliance. <br><br>Furthermore, the knowledge base includes adjacent topics like <strong>Web, Content, and SEO</strong> to provide holistic guidance across the entire marketing workflow.
                 </p>
                 
                 <h3 class="text-xl font-semibold mb-2 mt-4 text-[#FD00F9]">Technical Execution:</h3>
@@ -440,9 +443,6 @@
                 } else if (link.includes('confluence')) {
                     linkText = 'View Confluence Page';
                     linkIcon = 'layout-list';
-                } else if (link.includes('snyk.interactgo.com')) {
-                    linkText = 'View Dispatch Documentation';
-                    linkIcon = 'mail';
                 } else {
                     linkText = 'Learn More';
                     linkIcon = 'external-link';
