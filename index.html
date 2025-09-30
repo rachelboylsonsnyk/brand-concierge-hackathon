@@ -44,8 +44,8 @@
             background-color: #181846; /* New chat box background */
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
-            /* CRITICAL FIX: Set height of card to fill available vertical space */
-            max-height: 85vh; 
+            /* CRITICAL FIX: Subtract header/padding height (approx 114px logo height + 1.5rem padding + 1rem body padding) */
+            max-height: calc(100vh - 150px); 
         }
         .loading-spinner {
             border-top-color: #FD00F9; /* Use new neon color for spinner */
