@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brand Concierge Chatbot</title>
-    <!-- ADDED: Favicon Link (Updated to favicon.ico) -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico"> 
+    <!-- FIX: Updated Favicon Link to use favicon.png -->
+    <link rel="icon" type="image/png" href="/favicon.png"> 
     
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -44,8 +44,8 @@
             background-color: #181846; /* New chat box background */
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
-            /* CRITICAL FIX: Subtract header/padding height (approx 114px logo height + 1.5rem padding + 1rem body padding) */
-            max-height: calc(100vh - 150px); 
+            /* CRITICAL FIX: Set height of card to fit precisely within the viewport */
+            max-height: calc(95vh - 110px); 
         }
         .loading-spinner {
             border-top-color: #FD00F9; /* Use new neon color for spinner */
