@@ -45,7 +45,7 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
             /* CRITICAL FIX: Set height of card to fit precisely within the viewport */
-            max-height: calc(95vh - 110px); 
+            max-height: calc(90vh - 110px); 
         }
         .loading-spinner {
             border-top-color: #FD00F9; /* Use new neon color for spinner */
@@ -112,7 +112,8 @@
             <!-- CHAT VIEW CONTAINER -->
             <div id="chatView" class="flex flex-col flex-grow">
                 <!-- Chat Messages Display -->
-                <div id="chatMessages" class="chat-container flex-grow"> 
+                <!-- CRITICAL FIX: Added py-4 padding top/bottom to the scroll container -->
+                <div id="chatMessages" class="chat-container flex-grow py-4"> 
                     <!-- Messages will be appended here -->
                 </div>
 
