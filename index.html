@@ -24,15 +24,16 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            /* FIX: Use 100vh here to fill the screen */
             min-height: 100vh;
             padding: 1rem;
             /* FIX: Subtle negative letter-spacing for refined look */
             letter-spacing: -0.015em;
         }
         .chat-container {
-            /* This height now relies on the parent card being flexible */
-            height: calc(85vh - 100px); 
-            max-height: 80vh;
+            /* CRITICAL FIX: Use flex-grow and min-height 0 to allow it to shrink and fill the remaining space */
+            flex-grow: 1; 
+            min-height: 0;
             overflow-y: auto;
             /* FIX: Removed space-y, relying solely on mt-4 in JS */
             display: flex;
@@ -43,6 +44,8 @@
             background-color: #181846; /* New chat box background */
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
+            /* CRITICAL FIX: Set height of card to fill available vertical space */
+            max-height: 85vh; 
         }
         .loading-spinner {
             border-top-color: #FD00F9; /* Use new neon color for spinner */
@@ -75,7 +78,8 @@
 </head>
 <body>
 
-    <div id="app" class="w-full max-w-2xl">
+    <!-- CRITICAL FIX: Set the app container to fill a large portion of the viewport -->
+    <div id="app" class="w-full max-w-2xl flex flex-col min-h-screen">
         <header class="text-center mb-6">
             <!-- START LOGO REPLACEMENT -->
             <div class="mb-4 flex justify-center">
@@ -88,7 +92,8 @@
         </header>
 
         <!-- Tab Interface Card -->
-        <div class="card rounded-xl flex flex-col"> 
+        <!-- CRITICAL FIX: Add flex-grow so the card takes up the remaining vertical space -->
+        <div class="card rounded-xl flex flex-col flex-grow"> 
             
             <!-- Navigation Tabs -->
             <nav class="flex border-b border-gray-600">
@@ -111,8 +116,8 @@
                     <!-- Messages will be appended here -->
                 </div>
 
-                <!-- Input Area -->
-                <div class="p-3"> <!-- FIX: border-t border-gray-600 removed -->
+                <!-- Input Area (Fixed Height) -->
+                <div class="p-3"> 
                     
                     <!-- FIX: text-indigo-400 changed to text-white for loading indicator text -->
                     <div id="loadingIndicator" class="hidden flex items-center justify-center py-2 text-white">
@@ -210,7 +215,7 @@
                 <p class="text-white mb-2">Goal: <strong>Automate daily work</strong> and ensure the solution is robust and usable.</p>
                 <!-- FIX: text-gray-300 changed to text-white for list items -->
                 <ul class="hanging-indent space-y-2 text-white"> 
-                    <li><strong>Live Source Integration:</strong> Replace the static knowledge file with a direct, automated fetch from <strong>Google Drive, Dispatch, Confluence, Figma, or Slack</strong> via their APIs, ensuring the knowledge is always up-to-date without manual intervention.</li>
+                    <li><strong>Live Source Integration:</strong> Replace the static knowledge file with a direct, automated fetch from **Google Drive, Dispatch, Confluence, Figma, or Slack** via their APIs, ensuring the knowledge is always up-to-date without manual intervention.</li>
                 </ul>
                 
                 <h3 class="text-xl font-semibold mb-2 mt-4 text-[#FD00F9]"><i data-lucide="trending-up" class="w-5 h-5 inline-block mr-1 text-red-400"></i> Impact & ROI</h3>
