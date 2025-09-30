@@ -154,9 +154,8 @@
             <div id="videoView" class="flex-grow p-6 text-white overflow-y-auto hidden">
                 <h2 id="video" class="text-3xl font-bold mb-4 text-center text-[#FD00F9]">Introducing the Brand Concierge AI Chatbot</h2>
                 
-                <!-- NEW: Responsive video player -->
+                <!-- UPDATED: Removed 'muted' and 'autoplay' -->
                 <div class="aspect-video w-full max-w-lg mx-auto rounded-xl overflow-hidden shadow-2xl mt-8">
-                    <!-- REMOVED 'poster' attribute to remove the placeholder thumbnail -->
                     <video controls playsinline class="w-full h-full object-cover">
                         <source src="/assets/images/video.mp4" type="video/mp4">
                         Your browser does not support the video tag.
@@ -201,7 +200,7 @@
                     <div class="py-4 px-2 bg-[#1D1D4D] rounded-lg shadow-xl text-center">
                         <img src="/assets/images/rachel.png" 
                              alt="Headshot for Rachel Boylson" 
-                             class-="w-24 h-24 rounded-full mx-auto mb-3 border-4 border-[#FD00F9]">
+                             class="w-24 h-24 rounded-full mx-auto mb-3 border-4 border-[#FD00F9]">
                         <p class="font-semibold text-white">Rachel Boylson</p>
                         <!-- FIX: text-gray-300 changed to text-white -->
                         <p class="text-sm text-white">Web Producer</p>
@@ -217,6 +216,17 @@
                 <!-- END NEW SECTION -->
 
                 <h3 class="text-2xl font-bold mb-4 text-[#FD00F9] border-t border-gray-600 pt-4">About the Brand Concierge</h3>
+                
+                <!-- NEW VIDEO EMBEDDED HERE -->
+                <!-- UPDATED: Removed 'muted' and 'autoplay' -->
+                <div class="aspect-video w-full max-w-lg mx-auto rounded-xl overflow-hidden shadow-2xl mb-4">
+                    <video controls playsinline class="w-full h-full object-cover">
+                        <source src="/assets/images/about.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <!-- END NEW VIDEO -->
+
                 <p class="mb-4">
                     The <strong>Brand Concierge AI</strong> was developed to <strong>automate daily work</strong> by providing a single, intelligent source of truth for design guidelines. This project helps eliminate the time spent searching for assets and rules, allowing stakeholders to easily find information and <strong>simplify complex problems</strong> related to brand compliance. <br><br>Furthermore, the knowledge base includes adjacent topics like <strong>Web, Content, and SEO</strong> to provide holistic guidance across the entire marketing workflow.
                 </p>
