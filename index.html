@@ -156,8 +156,8 @@
                 
                 <!-- NEW: Responsive video player -->
                 <div class="aspect-video w-full max-w-lg mx-auto rounded-xl overflow-hidden shadow-2xl mt-8">
-                    <!-- REMOVED 'muted' attribute to enable sound by default -->
-                    <video controls playsinline class="w-full h-full object-cover" poster="https://placehold.co/1280x720/145DEB/ffffff?text=Video+Placeholder">
+                    <!-- REMOVED 'poster' attribute to remove the placeholder thumbnail -->
+                    <video controls playsinline class="w-full h-full object-cover">
                         <source src="/assets/images/video.mp4" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
@@ -201,7 +201,7 @@
                     <div class="py-4 px-2 bg-[#1D1D4D] rounded-lg shadow-xl text-center">
                         <img src="/assets/images/rachel.png" 
                              alt="Headshot for Rachel Boylson" 
-                             class="w-24 h-24 rounded-full mx-auto mb-3 border-4 border-[#FD00F9]">
+                             class-="w-24 h-24 rounded-full mx-auto mb-3 border-4 border-[#FD00F9]">
                         <p class="font-semibold text-white">Rachel Boylson</p>
                         <!-- FIX: text-gray-300 changed to text-white -->
                         <p class="text-sm text-white">Web Producer</p>
@@ -533,6 +533,8 @@
             try {
                 const reply = result.conversational_reply || "I encountered an issue processing the request. Please try rephrasing.";
                 
+                // FINAL FIX: Ensure link is only present if the API provides it.
+                // This removes the link fallback logic.
                 const link = (result.recommended_link && result.recommended_link !== 'None') 
                              ? result.recommended_link 
                              : null;
