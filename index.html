@@ -97,21 +97,22 @@
         <div class="card rounded-xl flex flex-col flex-grow"> 
             
             <!-- Navigation Tabs -->
+            <!-- Updated onclick handlers to use the new routing function -->
             <nav class="flex border-b border-gray-600">
                 <!-- 1. CHAT TAB -->
-                <button id="chatTab" onclick="showTab('chat')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors tab-active">
+                <button id="chatTab" onclick="handleNavigation('chat')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors tab-active">
                     <i data-lucide="message-square" class="w-4 h-4 inline-block mr-1 text-white"></i> Chat
                 </button>
                 <!-- 2. VIDEO TAB (Swapped position) -->
-                <button id="videoTab" onclick="showTab('video')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors">
+                <button id="videoTab" onclick="handleNavigation('video')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors">
                     <i data-lucide="youtube" class="w-4 h-4 inline-block mr-1 text-white"></i> Video
                 </button>
                 <!-- 3. ABOUT TAB (Swapped position) -->
-                <button id="aboutTab" onclick="showTab('about')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors">
+                <button id="aboutTab" onclick="handleNavigation('about')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors">
                     <i data-lucide="info" class="w-4 h-4 inline-block mr-1 text-white"></i> About
                 </button>
                 <!-- 4. FUTURE TAB -->
-                <button id="futureTab" onclick="showTab('future')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors">
+                <button id="futureTab" onclick="handleNavigation('future')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors">
                     <i data-lucide="rocket" class="w-4 h-4 inline-block mr-1 text-white"></i> Future
                 </button>
             </nav>
@@ -319,20 +320,54 @@
         const videoTab = document.getElementById('videoTab'); 
         const futureTab = document.getElementById('futureTab'); 
         
+        // Map path slugs to tab names
+        const pathMap = {
+            '/': 'chat',
+            '/video': 'video',
+            '/about': 'about',
+            '/future': 'future'
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             // FIX: Updated message to be more generic (Option A)
             appendMessage('bot', `Hello! I'm your <strong>Brand Concierge</strong>. I've been pre-loaded with the core design guidelines and can <strong>help you with most questions</strong> about our brand assets.`);
             lucide.createIcons();
-            // Ensure the correct view is shown on load
-            // Check for anchor link in URL (for hackathon requirement)
-            if (window.location.hash === '#video') {
-                showTab('video');
-            } else {
-                showTab('chat'); 
-            }
+            
+            // Initial routing based on current URL path
+            routeFromPath(window.location.pathname);
+            
+            // Listen for browser back/forward buttons
+            window.addEventListener('popstate', (event) => {
+                routeFromPath(window.location.pathname);
+            });
         });
+        
+        // New function to handle path-to-tab routing
+        function routeFromPath(pathname) {
+            let tabName = pathMap[pathname];
+            if (!tabName) {
+                // Check if the old hash (#video) is still present for backwards compatibility
+                if (window.location.hash === '#video') {
+                    tabName = 'video';
+                } else {
+                    tabName = 'chat'; // Default to chat
+                }
+            }
+            showTab(tabName, false); // Don't push state again on initial load or popstate
+        }
+        
+        // New function to handle tab clicks and URL updates
+        function handleNavigation(tabName) {
+            const path = Object.keys(pathMap).find(key => pathMap[key] === tabName);
+            if (path && path !== window.location.pathname) {
+                // Use history.pushState to update the URL without reloading
+                history.pushState({ tab: tabName }, '', path);
+            }
+            showTab(tabName, false);
+        }
 
         // Function to switch between tabs
+        // Removed path parameter as it's now handled by handleNavigation
         function showTab(tabName) {
             // Hide all views
             chatView.classList.add('hidden');
