@@ -25,11 +25,11 @@ export default async function handler(request, response) {
     let knowledgeBaseContent;
     try {
         // Construct the path to the knowledge base file
-        const knowledgeFilePath = path.join(process.cwd(), 'knowledge_base.txt');
+        // FIX: CHANGED FILE EXTENSION TO .csv
+        const knowledgeFilePath = path.join(process.cwd(), 'knowledge_base.csv');
         knowledgeBaseContent = await fs.readFile(knowledgeFilePath, 'utf-8');
 
         // 🛑 CRITICAL FIX: Strip the Byte Order Mark (BOM) if present.
-        // This prevents invisible characters from corrupting the JSON payload sent to Gemini.
         if (knowledgeBaseContent.charCodeAt(0) === 0xFEFF) {
             knowledgeBaseContent = knowledgeBaseContent.slice(1);
         }
@@ -38,7 +38,7 @@ export default async function handler(request, response) {
         console.error("Knowledge Base Read Error:", error);
         return response.status(500).json({ 
             error: 'Configuration Error', 
-            details: 'Could not read knowledge_base.txt. Ensure the file is present in the project root.' 
+            details: 'Could not read knowledge_base.csv. Ensure the file is present in the project root.' 
         });
     }
     // --- END FILE READING LOGIC ---
@@ -57,11 +57,12 @@ export default async function handler(request, response) {
             1. You **MUST** prioritize the **KNOWLEDGE_BASE DOCUMENT**.
             2. If the knowledge base contains an entry with the **Topic set to "Non-Brand question"**, your conversational_reply MUST include a gentle disclaimer like, "While that isn't specifically a core brand-compliance question, I can certainly point you in the right direction:" followed by the answer and link.
             3. If the question is clearly **out of scope** (e.g., general knowledge, recipes, sports, or topics unrelated to brand, marketing, or web operations), your conversational_reply MUST state: "I'm the Brand Concierge, so my knowledge is focused on brand assets and guidelines. I can't help with general knowledge questions, but feel free to ask me anything about our marketing or brand." The recommended_link MUST be set to 'None'.
-            4. If the question relates to brand/marketing but the answer is NOT found in the knowledge base, your conversational_reply MUST state: "I haven't found that in the current knowledge base. For further assistance, please reach out directly to the team in the #ask-brand-design Slack channel." and the recommended_link MUST be set to: https://snyk.enterprise.slack.com/archives/C041RSP2LG2.
+            4. 🛑 **FINAL FALLBACK RULE:** If the question relates to brand/marketing but the answer is NOT found in the knowledge base, your conversational_reply MUST state: "I haven't found that in the current knowledge base. For further assistance, please reach out directly to the team in the #ask-brand-design Slack channel." and the recommended_link MUST be set to: https://snyk.enterprise.slack.com/archives/C041RSP2LG2.
             5. You MUST always return a valid JSON object matching the requested schema.
 
             KNOWLEDGE_BASE DOCUMENT:
             ---
+            [DATA FORMAT: CSV, TOPIC, KEYWORD, DESCRIPTION, LINK, STATUS]
             ${knowledgeBaseContent} 
             ---
             USER QUESTION: "${query}"
