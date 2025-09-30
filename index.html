@@ -97,22 +97,22 @@
         <div class="card rounded-xl flex flex-col flex-grow"> 
             
             <!-- Navigation Tabs -->
-            <!-- Updated onclick handlers to use the new routing function -->
+            <!-- UPDATED: Reverted to hash-based routing/no navigation in HTML -->
             <nav class="flex border-b border-gray-600">
                 <!-- 1. CHAT TAB -->
-                <button id="chatTab" onclick="handleNavigation('chat')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors tab-active">
+                <button id="chatTab" onclick="showTab('chat')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors tab-active">
                     <i data-lucide="message-square" class="w-4 h-4 inline-block mr-1 text-white"></i> Chat
                 </button>
                 <!-- 2. VIDEO TAB (Swapped position) -->
-                <button id="videoTab" onclick="handleNavigation('video')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors">
+                <button id="videoTab" onclick="showTab('video')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors">
                     <i data-lucide="youtube" class="w-4 h-4 inline-block mr-1 text-white"></i> Video
                 </button>
                 <!-- 3. ABOUT TAB (Swapped position) -->
-                <button id="aboutTab" onclick="handleNavigation('about')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors">
+                <button id="aboutTab" onclick="showTab('about')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors">
                     <i data-lucide="info" class="w-4 h-4 inline-block mr-1 text-white"></i> About
                 </button>
                 <!-- 4. FUTURE TAB -->
-                <button id="futureTab" onclick="handleNavigation('future')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors">
+                <button id="futureTab" onclick="showTab('future')" class="flex-1 p-3 text-center text-white hover:bg-[#28285c] transition-colors">
                     <i data-lucide="rocket" class="w-4 h-4 inline-block mr-1 text-white"></i> Future
                 </button>
             </nav>
@@ -209,7 +209,7 @@
                 <!-- NEW SECTION: AI BUILDING ACKNOWLEDGEMENT -->
                 <h3 class="text-2xl font-bold mb-4 text-[#FD00F9] border-t border-gray-600 pt-4">Built with AI</h3>
                 <p class="mb-4">
-                    The Brand Concierge itself is a product of AI innovation. Both the **front-end code and the visual assets** were created using advanced generative AI tools, showcasing a modern, efficient, and accelerated development pipeline. This rapid development model directly reflects the project's goal: **to automate and simplify complex processes**.
+                    The Brand Concierge itself is a product of AI innovation. Both the <strong>front-end code and the visual assets</strong> were created using advanced generative AI tools, showcasing a modern, efficient, and accelerated development pipeline. This rapid development model directly reflects the project's goal: <strong>to automate and simplify complex processes</strong>.
                 </p>
                 <!-- END NEW SECTION -->
 
@@ -320,12 +320,13 @@
         const videoTab = document.getElementById('videoTab'); 
         const futureTab = document.getElementById('futureTab'); 
         
-        // Map path slugs to tab names
-        const pathMap = {
-            '/': 'chat',
-            '/video': 'video',
-            '/about': 'about',
-            '/future': 'future'
+        // Map hash slugs to tab names
+        // UPDATED: Changed pathMap to hashMap
+        const tabMap = {
+            '#chat': 'chat',
+            '#video': 'video',
+            '#about': 'about',
+            '#future': 'future'
         };
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -333,41 +334,35 @@
             appendMessage('bot', `Hello! I'm your <strong>Brand Concierge</strong>. I've been pre-loaded with the core design guidelines and can <strong>help you with most questions</strong> about our brand assets.`);
             lucide.createIcons();
             
-            // Initial routing based on current URL path
-            routeFromPath(window.location.pathname);
+            // Initial routing based on URL hash
+            routeFromHash(window.location.hash);
             
-            // Listen for browser back/forward buttons
-            window.addEventListener('popstate', (event) => {
-                routeFromPath(window.location.pathname);
+            // Listen for hash changes (when user clicks links or uses back/forward buttons)
+            window.addEventListener('hashchange', (event) => {
+                routeFromHash(window.location.hash);
             });
         });
         
-        // New function to handle path-to-tab routing
-        function routeFromPath(pathname) {
-            let tabName = pathMap[pathname];
-            if (!tabName) {
-                // Check if the old hash (#video) is still present for backwards compatibility
-                if (window.location.hash === '#video') {
-                    tabName = 'video';
-                } else {
-                    tabName = 'chat'; // Default to chat
-                }
-            }
-            showTab(tabName, false); // Don't push state again on initial load or popstate
+        // New function to handle hash-to-tab routing
+        function routeFromHash(hash) {
+            let tabName = tabMap[hash || '#chat']; // Default to #chat if hash is empty
+            showTab(tabName);
         }
         
         // New function to handle tab clicks and URL updates
+        // UPDATED: Now sets the URL hash instead of pushing state
         function handleNavigation(tabName) {
-            const path = Object.keys(pathMap).find(key => pathMap[key] === tabName);
-            if (path && path !== window.location.pathname) {
-                // Use history.pushState to update the URL without reloading
-                history.pushState({ tab: tabName }, '', path);
+            const hash = Object.keys(tabMap).find(key => tabMap[key] === tabName);
+            if (hash) {
+                // Update the URL hash to trigger hashchange listener or for direct linking
+                window.location.hash = hash;
             }
-            showTab(tabName, false);
+            // showTab is now called by the hashchange listener, but we call it directly
+            // here just in case the hash doesn't change (e.g., clicking the active tab)
+            showTab(tabName); 
         }
 
         // Function to switch between tabs
-        // Removed path parameter as it's now handled by handleNavigation
         function showTab(tabName) {
             // Hide all views
             chatView.classList.add('hidden');
